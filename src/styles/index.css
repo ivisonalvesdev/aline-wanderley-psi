@@ -1,0 +1,658 @@
+/* Poppins — fonte principal da marca (títulos, subtítulos e textos).
+   Só o subset latino: o pacote completo arrasta devanágari e um .woff
+   legado que nenhum navegador atual usa.
+
+   O peso 300 entra para abrir a escala tipográfica: com 300/400/500/600
+   dá para hierarquizar por peso, e não só por tamanho — é o que separa
+   uma página com tipografia trabalhada de uma com "fonte padrão". */
+@import "@fontsource/poppins/latin-300.css";
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-500.css";
+@import "@fontsource/poppins/latin-600.css";
+/* Montserrat — complementar (rótulos, dados, microtexto).
+   O pacote variável não expõe CSS por subset; os `unicode-range` do
+   próprio arquivo já impedem o navegador de baixar cirílico e afins. */
+@import "@fontsource-variable/montserrat";
+@import "tailwindcss";
+
+/**
+ * Halimun — fonte de assinatura da identidade.
+ *
+ * ⚠️ ATENÇÃO LICENÇA: o arquivo em assets/fontes/ é a versão DEMO,
+ * liberada apenas para uso PESSOAL. O Readme.txt do próprio autor
+ * (Creatype Studio) proíbe uso comercial — e uma landing page que
+ * divulga um serviço é uso comercial. Antes de publicar, é preciso
+ * comprar a licença em https://creatypestudio.co/halimun e trocar
+ * este arquivo pelo da versão licenciada.
+ */
+@font-face {
+  font-family: "Halimun";
+  src: url("../../assets/fontes/Halimun.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------------------------------- */
+/*  Design tokens                     */
+/* ---------------------------------- */
+@theme {
+  /* Poppins responde por títulos e corpo, como manda o manual da marca.
+     `display` existe só para separar a intenção nos componentes. */
+  --font-sans: "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-alt: "Montserrat Variable", "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-signature: "Halimun", "Segoe Script", cursive;
+
+  /* Breakpoint extra para monitores grandes (1920px+) */
+  --breakpoint-3xl: 120rem;
+
+  /**
+   * Rosa da marca.
+   *   300 = #F8A8C5 (cor principal do manual)
+   *   500 = #E16C84 (cor de destaque do manual)
+   *   600 = versão escurecida do destaque, criada aqui porque #E16C84
+   *         com texto branco dá 3,14:1 — abaixo do mínimo AA (4,5:1).
+   *         #C4405F mantém o matiz (346° contra 348°) e sobe para 4,95:1.
+   *         Regra prática: 500 para ícones, bordas e detalhes;
+   *         600 para qualquer fundo que receba texto branco.
+   */
+  --color-blush-50: #fef6f9;
+  --color-blush-100: #fdeaf1;
+  --color-blush-200: #fbd3e1;
+  --color-blush-300: #f8a8c5;
+  --color-blush-400: #ee8aa8;
+  --color-blush-500: #e16c84;
+  --color-blush-600: #c4405f;
+  --color-blush-700: #9e3049;
+
+  /* Azul da marca — 300 = #97BBDA (secundária, uso pontual) */
+  --color-cloud-50: #f4f8fc;
+  --color-cloud-100: #e7f0f8;
+  --color-cloud-200: #cddfee;
+  --color-cloud-300: #97bbda;
+  --color-cloud-400: #7aa3c7;
+  --color-cloud-500: #5c86ad;
+
+  /* Creme da marca — 100 = #F9F2E1 (cor de apoio: fundos e respiro) */
+  --color-cream-50: #fdfaf3;
+  --color-cream-100: #f9f2e1;
+  --color-cream-200: #f2e7ce;
+  --color-cream-300: #e6d5af;
+
+  /* Neutros quentes — acompanham o creme em vez de brigar com ele */
+  --color-mist-50: #fbfaf8;
+  --color-mist-100: #f5f3ef;
+  --color-mist-200: #eae6e0;
+  --color-mist-300: #d9d3ca;
+
+  /* Tinta — textos. Todos passam AA sobre branco e sobre creme. */
+  --color-ink-900: #302a2c;
+  --color-ink-700: #55494d;
+  --color-ink-500: #7b6e71;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-fade-in: fade-in 1.6s ease-out both;
+  /* Halo do botão flutuante do WhatsApp — dois anéis defasados */
+  --animate-pulse-ring: pulse-ring 2.6s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    80%,
+    100% {
+      transform: scale(1.85);
+      opacity: 0;
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* ---------------------------------- */
+/*  Base                              */
+/* ---------------------------------- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Rede de segurança contra estouro horizontal em telas estreitas.
+     `clip` (e não `hidden`) preserva sticky/fixed. */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    @apply bg-white font-sans text-ink-700 antialiased;
+    text-rendering: optimizeLegibility;
+
+    /* Refino tipográfico global. O Poppins entrega kerning e ligaturas
+       decentes, mas o navegador só usa tudo se pedirmos: sem isto, pares
+       como "Ta", "Vo", "fi" saem com espaçamento de fonte de sistema —
+       que é justamente o que denuncia uma página montada às pressas. */
+    font-kerning: normal;
+    font-optical-sizing: auto;
+    font-variant-ligatures: common-ligatures contextual;
+    font-feature-settings:
+      "kern" 1,
+      "liga" 1,
+      "calt" 1;
+  }
+
+  /* Quebra de linha "bonita": evita a órfã de uma palavra sozinha na
+     última linha de um parágrafo, sem o custo de balancear tudo. */
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  /**
+   * Grão de filme.
+   *
+   * Serve a dois propósitos: mata o banding dos degradês (faixas visíveis
+   * em telas de 8 bits, o efeito "linha de contraste") e dá textura ao
+   * branco. A opacidade é baixa a ponto de não ser percebida como ruído —
+   * só como acabamento.
+   */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 260px 260px;
+  }
+
+  ::selection {
+    @apply bg-blush-200 text-ink-900;
+  }
+
+  /* Folga do header fixo (h-20 / sm:h-24) ao pular por âncora */
+  section[id] {
+    scroll-margin-top: 7rem;
+  }
+
+  /* Estados de foco visíveis — navegação por teclado */
+  :focus-visible {
+    @apply outline-2 outline-offset-4 outline-blush-500 rounded-sm;
+  }
+
+  /* Trava a rolagem enquanto o preloader conta até 100 */
+  body[data-loading="true"] {
+    overflow: hidden;
+  }
+}
+
+/* ---------------------------------- */
+/*  Componentes                       */
+/* ---------------------------------- */
+@layer components {
+  /**
+   * Palavra em destaque dentro de um texto (ver `utils/rich.tsx`).
+   *
+   * A cor vem de uma variável para que o mesmo componente sirva sobre
+   * fundo claro (rosa escuro, contraste AA) e sobre a foto do hero
+   * (rosa claro) — quem define é o contêiner, com `[--rich-accent:…]`.
+   * O peso sobe só meio passo: destaque que pesa demais vira grito.
+   */
+  .rich-em {
+    font-style: normal;
+    font-weight: var(--rich-weight, 600);
+    color: var(--rich-accent, var(--color-blush-600));
+  }
+
+  /**
+   * Camadas de profundidade dentro de um cartão inclinável.
+   *
+   * O deslocamento só existe enquanto o cartão está sob o cursor. Manter
+   * `translateZ` fixo custaria nitidez o tempo todo: com perspectiva, o
+   * elemento deslocado é reescalado por um fator fracionário (1.036, por
+   * exemplo) e o navegador passa a rasterizar o texto fora da grade de
+   * pixels — o resultado é um borrão sutil, mas permanente.
+   */
+  .depth-1,
+  .depth-2,
+  .depth-3 {
+    transition: transform 0.55s var(--ease-out-soft);
+  }
+
+  [data-tilting="true"] .depth-1 {
+    transform: translateZ(14px);
+  }
+
+  [data-tilting="true"] .depth-2 {
+    transform: translateZ(26px);
+  }
+
+  [data-tilting="true"] .depth-3 {
+    transform: translateZ(42px);
+  }
+}
+
+/* ---------------------------------- */
+/*  Variantes                         */
+/* ---------------------------------- */
+
+/**
+ * Telas de notebook: largura de desktop, mas altura curta (1366×768,
+ * 1440×900, ou qualquer tela com escala do Windows em 125%/150%).
+ * Usada para comprimir o hero e manter os CTAs acima da dobra.
+ */
+@custom-variant short (@media (min-width: 64rem) and (max-height: 54rem));
+
+/* ---------------------------------- */
+/*  Utilitários do projeto            */
+/* ---------------------------------- */
+
+/**
+ * Container fluido: acompanha a largura da tela em notebooks e monitores
+ * grandes (sem as faixas vazias de um max-width fixo) e mantém respiro
+ * proporcional no mobile. O teto evita linhas longas demais em ultrawide.
+ */
+@utility container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 112rem; /* 1792px */
+  padding-inline: clamp(1.25rem, 4vw, 4rem);
+}
+
+/* Ritmo vertical das seções — escala com a viewport */
+@utility section-y {
+  padding-block: clamp(4.5rem, 6.5vw, 8rem);
+}
+
+/* Variante mais generosa (CTA final) */
+@utility section-y-lg {
+  padding-block: clamp(5.5rem, 8vw, 9.5rem);
+}
+
+/* Tipografia fluida — sem saltos entre breakpoints.
+   O `min()` com svh evita que o título domine telas baixas (notebooks).
+
+   Teto reduzido de 4.5rem para 3.75rem quando a headline dobrou de
+   tamanho ("Atrás de cada comportamento…", 73 caracteres): no corpo
+   anterior ela ocupava 4 linhas e empurrava os CTAs para fora da
+   dobra em notebook.
+
+   O tracking negativo cresce junto com o corpo: em display, a fonte
+   parece "solta" no tamanho grande com o espaçamento que serve ao
+   texto corrido. Apertar é o que dá o aspecto editorial. */
+@utility heading-hero {
+  font-size: clamp(2rem, min(4.2vw, 6.2svh), 3.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.024em;
+}
+
+@utility heading-section {
+  font-size: clamp(1.75rem, 2.9vw, 2.85rem);
+  line-height: 1.12;
+  letter-spacing: -0.019em;
+}
+
+/**
+ * Rótulo curto acima dos títulos ("Especialidades", "Formação"…).
+ *
+ * Montserrat em caixa alta, peso alto e tracking largo: em corpo
+ * pequeno, o espaçamento generoso é o que mantém a palavra legível e
+ * ao mesmo tempo discreta. Centraliza aqui o que estava repetido em
+ * oito arquivos com valores ligeiramente diferentes.
+ */
+@utility eyebrow {
+  font-family: var(--font-alt);
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/**
+ * Parágrafo de abertura — um degrau acima do corpo, com peso leve para
+ * não competir com o título logo acima.
+ *
+ * ⚠️ Peso 300 pede tinta mais escura para compensar: use com `ink-700`,
+ * nunca com `ink-500`. Traço fino em cinza claro é o atalho mais comum
+ * para um texto bonito e ilegível. Pelo mesmo motivo, não serve para
+ * texto sobre foto — ali o peso é o que garante a leitura.
+ */
+@utility lede {
+  font-size: clamp(1rem, 1.15vw, 1.1875rem);
+  font-weight: 300;
+  line-height: 1.7;
+  letter-spacing: 0.002em;
+}
+
+/* Números que mudam no lugar (contador do preloader, dados) — sem
+   tabular-nums a largura dança a cada dígito. */
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+/* Cartão premium com borda e sombra difusa */
+@utility card-soft {
+  @apply rounded-3xl border border-mist-200 bg-white shadow-[0_20px_60px_-24px_rgb(48_42_44_/_0.08)];
+}
+
+/**
+ * Cartão de vidro.
+ *
+ * Três camadas fazem o material: o `backdrop-blur` desfoca o que passa por
+ * trás, a borda clara simula a espessura da peça e o degradê interno dá a
+ * queda de luz de cima para baixo. Só funciona quando há algo colorido
+ * atrás para ser borrado — sobre branco liso, vidro e papel são iguais.
+ *
+ * O reflexo (`::after`) é posicionado pelas variáveis que o `useTilt`
+ * atualiza e acende apenas com o cursor sobre a peça.
+ */
+@utility card-glass {
+  position: relative;
+  border-radius: 1.5rem;
+  border: 1px solid rgb(255 255 255 / 0.65);
+  background-image: linear-gradient(
+    160deg,
+    rgb(255 255 255 / 0.78) 0%,
+    rgb(255 255 255 / 0.62) 42%,
+    rgb(255 255 255 / 0.52) 100%
+  );
+  backdrop-filter: blur(20px) saturate(1.25);
+  box-shadow:
+    0 24px 60px -28px rgb(48 42 44 / 0.22),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.85);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.45s var(--ease-out-soft);
+    background: radial-gradient(
+      42rem 24rem at var(--glare-x, 50%) var(--glare-y, 0%),
+      rgb(255 255 255 / 0.55) 0%,
+      rgb(255 255 255 / 0.18) 28%,
+      rgb(255 255 255 / 0) 60%
+    );
+  }
+
+  &[data-tilting="true"]::after {
+    opacity: 1;
+  }
+}
+
+/**
+ * Filete divisório que se dissolve nas pontas.
+ *
+ * Uma borda sólida de ponta a ponta corta o bloco em dois; com as
+ * extremidades transparentes a linha só sugere a separação — mesma
+ * função, sem o peso visual.
+ */
+@utility border-soft-t {
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--color-mist-200) 18%,
+      var(--color-mist-200) 82%,
+      transparent 100%
+    )
+    1;
+}
+
+/* Máscara usada no reveal de títulos (SplitText) */
+.split-line {
+  overflow: hidden;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}
+
+/* ---------------------------------- */
+/*  Superfícies das seções            */
+/* ---------------------------------- */
+
+/**
+ * Três variações de fundo claro que se alternam ao longo da página.
+ *
+ * Duas regras as unem:
+ *
+ * 1. Todas abrem e fecham em branco puro — duas seções vizinhas sempre
+ *    se encontram na mesma cor, sem a linha de corte que deixava a
+ *    emenda "seca". O degradê vive só no miolo de cada bloco.
+ *
+ * 2. Todos os degradês são escritos com muitas paradas intermediárias.
+ *    Um `linear-gradient(#fff, #f9f2e1)` com duas cores é interpolado
+ *    pelo navegador em passos inteiros de 8 bits e, num percurso longo
+ *    e de baixo contraste como este, cada passo vira uma faixa visível.
+ *    Quebrar a curva em pedaços curtos (somado ao grão de filme no
+ *    `body::after`) elimina essas linhas.
+ */
+
+/**
+ * Véu de contraste do hero — o que garante o texto branco legível sobre
+ * a foto.
+ *
+ * Vertical no mobile (o texto cobre a foto inteira) e lateral a partir de
+ * lg (texto à esquerda, a Aline à direita). Muitas paradas pelo mesmo
+ * motivo das superfícies: um véu escuro sobre foto é justamente onde o
+ * banding aparece primeiro, em faixas horizontais no céu e nas paredes.
+ */
+@utility hero-veil {
+  background-image: linear-gradient(
+    180deg,
+    rgb(48 42 44 / 0.58) 0%,
+    rgb(48 42 44 / 0.5) 10%,
+    rgb(48 42 44 / 0.4) 20%,
+    rgb(48 42 44 / 0.3) 32%,
+    rgb(48 42 44 / 0.22) 44%,
+    rgb(48 42 44 / 0.2) 54%,
+    rgb(48 42 44 / 0.26) 66%,
+    rgb(48 42 44 / 0.34) 78%,
+    rgb(48 42 44 / 0.42) 88%,
+    rgb(48 42 44 / 0.5) 100%
+  );
+
+  @media (width >= 64rem) {
+    background-image: linear-gradient(
+      90deg,
+      rgb(48 42 44 / 0.86) 0%,
+      rgb(48 42 44 / 0.8) 8%,
+      rgb(48 42 44 / 0.71) 18%,
+      rgb(48 42 44 / 0.6) 28%,
+      rgb(48 42 44 / 0.48) 38%,
+      rgb(48 42 44 / 0.36) 48%,
+      rgb(48 42 44 / 0.25) 58%,
+      rgb(48 42 44 / 0.16) 67%,
+      rgb(48 42 44 / 0.09) 75%,
+      rgb(48 42 44 / 0.04) 83%,
+      rgb(48 42 44 / 0) 92%
+    );
+  }
+}
+
+/**
+ * Dissolve o rodapé do hero no branco da seção seguinte.
+ *
+ * A curva é propositalmente atrasada: os primeiros 45% da faixa quase não
+ * clareiam, e só o último terço vira branco de fato. É isso que permite
+ * uma emenda alta (sem linha de corte) sem que os CTAs — texto branco —
+ * caiam sobre fundo claro em notebooks de tela baixa.
+ */
+@utility hero-fade-bottom {
+  background-image: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0) 0%,
+    rgb(255 255 255 / 0.03) 14%,
+    rgb(255 255 255 / 0.08) 26%,
+    rgb(255 255 255 / 0.16) 38%,
+    rgb(255 255 255 / 0.28) 50%,
+    rgb(255 255 255 / 0.44) 62%,
+    rgb(255 255 255 / 0.62) 73%,
+    rgb(255 255 255 / 0.8) 84%,
+    rgb(255 255 255 / 0.93) 93%,
+    rgb(255 255 255 / 1) 100%
+  );
+}
+
+/**
+ * Fundo do CTA final — abre no branco do FAQ (emenda invisível), passa
+ * pelo rosa e desce até o cinza do rodapé, desaturando aos poucos.
+ * É o degradê mais longo da página e o que mais exigia paradas extras:
+ * em quatro cores ele mostrava faixas horizontais no meio do bloco.
+ */
+@utility surface-cta {
+  background-image: linear-gradient(
+    180deg,
+    #fff 0%,
+    #fffdfe 8%,
+    #fffbfd 16%,
+    #fef8fb 24%,
+    #fef6f9 32%,
+    #fef2f6 42%,
+    #fdeef3 52%,
+    #fdeaf1 62%,
+    #fdeef3 71%,
+    #fcf2f5 79%,
+    #fcf6f6 87%,
+    #fbf8f7 94%,
+    #fbfaf8 100%
+  );
+}
+
+/* Padrão — branco com um véu diagonal rosa/azul quase invisível */
+@utility surface-soft {
+  background-color: #fff;
+  background-image:
+    radial-gradient(
+      78% 58% at 6% 16%,
+      rgb(253 234 241 / 0.55) 0%,
+      rgb(253 234 241 / 0.44) 22%,
+      rgb(253 234 241 / 0.3) 40%,
+      rgb(253 234 241 / 0.16) 58%,
+      rgb(253 234 241 / 0.06) 74%,
+      rgb(253 234 241 / 0) 88%
+    ),
+    radial-gradient(
+      74% 54% at 96% 84%,
+      rgb(231 240 248 / 0.5) 0%,
+      rgb(231 240 248 / 0.4) 22%,
+      rgb(231 240 248 / 0.27) 40%,
+      rgb(231 240 248 / 0.14) 58%,
+      rgb(231 240 248 / 0.05) 74%,
+      rgb(231 240 248 / 0) 88%
+    );
+}
+
+/* Faixa de descanso — o creme #F9F2E1 do manual, que o próprio documento
+   indica para "fundos e áreas de respiro". Bordas seguem brancas. */
+@utility surface-cream {
+  background-color: #fff;
+  background-image:
+    radial-gradient(
+      76% 56% at 92% 18%,
+      rgb(253 234 241 / 0.36) 0%,
+      rgb(253 234 241 / 0.26) 26%,
+      rgb(253 234 241 / 0.14) 46%,
+      rgb(253 234 241 / 0.05) 66%,
+      rgb(253 234 241 / 0) 82%
+    ),
+    radial-gradient(
+      70% 52% at 6% 84%,
+      rgb(231 240 248 / 0.32) 0%,
+      rgb(231 240 248 / 0.23) 26%,
+      rgb(231 240 248 / 0.12) 46%,
+      rgb(231 240 248 / 0.04) 66%,
+      rgb(231 240 248 / 0) 82%
+    ),
+    linear-gradient(
+      180deg,
+      #fff 0%,
+      #fffefd 6%,
+      #fefdfa 13%,
+      #fdfbf6 23%,
+      #fcf9f0 34%,
+      #faf5e9 44%,
+      #f9f2e1 52%,
+      #faf5e9 62%,
+      #fcf9f0 72%,
+      #fdfbf6 82%,
+      #fefdfa 90%,
+      #fffefd 96%,
+      #fff 100%
+    );
+}
+
+/* Blocos de respiro emocional — rosa e azul um pouco mais presentes */
+@utility surface-blush {
+  background-color: #fff;
+  background-image:
+    radial-gradient(
+      78% 58% at 10% 20%,
+      rgb(253 234 241 / 0.72) 0%,
+      rgb(253 234 241 / 0.56) 22%,
+      rgb(253 234 241 / 0.36) 42%,
+      rgb(253 234 241 / 0.18) 60%,
+      rgb(253 234 241 / 0.06) 76%,
+      rgb(253 234 241 / 0) 90%
+    ),
+    radial-gradient(
+      74% 56% at 90% 82%,
+      rgb(205 223 238 / 0.55) 0%,
+      rgb(205 223 238 / 0.42) 22%,
+      rgb(205 223 238 / 0.27) 42%,
+      rgb(205 223 238 / 0.13) 60%,
+      rgb(205 223 238 / 0.04) 76%,
+      rgb(205 223 238 / 0) 90%
+    ),
+    linear-gradient(
+      180deg,
+      #fff 0%,
+      #fffdfe 7%,
+      #fffafc 16%,
+      #fef7fa 27%,
+      #fef6f9 37%,
+      #fcf7fb 47%,
+      #f9f9fc 56%,
+      #f6f9fc 66%,
+      #f4f8fc 73%,
+      #f7fafd 82%,
+      #fbfcfe 90%,
+      #fefeff 96%,
+      #fff 100%
+    );
+}

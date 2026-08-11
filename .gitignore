@@ -1,0 +1,9 @@
+node_modules
+dist
+*.local
+.DS_Store
+.claude/settings.local.json
+
+# PNGs originais das fotos, mantidos localmente como backup — o site usa
+# as versões .webp em assets/. Peso alto (4,8 MB) sem necessidade no repo.
+assets/originais-png/
