@@ -4,7 +4,7 @@ import { PARENTS } from "@/constants/content";
 import { WhatsAppCta } from "@/components/WhatsAppCta";
 import { useReveal } from "@/hooks/useReveal";
 import { rich } from "@/utils/rich";
-import { gsap, ScrollTrigger, MOTION_OK } from "@/utils/gsap";
+import { gsap, MOTION_OK } from "@/utils/gsap";
 import parentalVideo from "@assets/orientacao-parental.mp4";
 
 export function Parents() {
@@ -44,70 +44,75 @@ export function Parents() {
       video.load();
     };
 
-    /*
-      O arquivo não pode sair junto com o resto da página: a seção fica no
-      meio do documento e quem não chega nela não deveria pagar por ela. O
-      download começa a duas telas de distância — não uma: ele precisa
-      terminar antes do gatilho de baixo, que é quem manda tocar.
-    */
-    const warmup = ScrollTrigger.create({
-      trigger: section,
-      start: "top bottom+=200%",
-      once: true,
-      onEnter: download,
-    });
-
     /**
      * Quando o vídeo toca — e o que ele deliberadamente ignora.
      *
      * A rolagem não conduz o vídeo: não há `scrub`, o loop corre no ritmo
-     * dele e a página não tem voz sobre em que quadro ele está. O que a
-     * rolagem decide é só uma coisa: se vale a pena manter um decodificador
-     * de vídeo aberto neste momento.
+     * dele e a página não tem voz sobre em que quadro ele está. A única
+     * decisão tomada aqui é se vale manter um decodificador de vídeo aberto
+     * neste momento.
      *
-     * E essa decisão é tomada com uma tela inteira de antecedência de cada
-     * lado (`bottom+=100%` e `top-=100%`). É essa folga que separa "toca
-     * quando aparece" de "já está tocando quando aparece": o loop começa
-     * enquanto a seção ainda está fora de quadro, então na hora em que ela
-     * entra — descendo ou subindo — o movimento já está em curso, sem o
-     * primeiro quadro congelado denunciando o truque.
+     * Quem observa é o `IntersectionObserver`, e não o ScrollTrigger, por
+     * um motivo concreto: esta seção é presa (`pin`), e durante o pin o
+     * GSAP troca a posição do elemento e insere um espaçador. Gatilhos
+     * medidos em coordenadas de rolagem passam a depender dessa
+     * reorganização — foi o que deixou o vídeo parado na volta. O
+     * observador lê a geometria real do elemento na tela e não se importa
+     * com pin nenhum.
      *
-     * A pausa só acontece a uma tela de distância, longe o suficiente para
-     * ninguém ver, e existe para o vídeo não ficar decodificando no fundo
-     * enquanto o usuário está em outra parte da página.
+     * O `rootMargin` é o que separa "toca quando aparece" de "já está
+     * tocando quando aparece": ele infla a área de observação em uma tela
+     * inteira para cima e para baixo, então o loop começa enquanto a seção
+     * ainda está fora de quadro. Descendo ou subindo, quando ela entra o
+     * movimento já está em curso — sem o primeiro quadro congelado
+     * denunciando o truque.
      */
-    const playback = ScrollTrigger.create({
-      trigger: section,
-      start: "top bottom+=100%",
-      end: "bottom top-=100%",
-      onEnter: play,
-      onEnterBack: play,
-      onLeave: () => video.pause(),
-      onLeaveBack: () => video.pause(),
-    });
+    let porPerto = false;
+
+    const playback = new IntersectionObserver(
+      ([entry]) => {
+        porPerto = entry.isIntersecting;
+        if (porPerto) play();
+        else video.pause();
+      },
+      { rootMargin: "100% 0px 100% 0px" },
+    );
+    playback.observe(section);
 
     /*
-      Chegada direta pelo link do menu (#para-pais) pula a rolagem que
-      dispararia os gatilhos acima, e o vídeo ficaria parado justamente para
-      quem foi direto à seção. Aqui o estado inicial é conferido à mão.
+      O arquivo não pode sair junto com o resto da página: a seção fica no
+      meio do documento e quem não chega nela não deveria pagar por ela. O
+      download começa a duas telas de distância — não uma: ele precisa
+      terminar antes do observador de cima, que é quem manda tocar.
     */
-    if (playback.isActive) {
-      download();
-      play();
-    }
+    const warmup = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        download();
+        warmup.disconnect();
+      },
+      { rootMargin: "200% 0px 200% 0px" },
+    );
+    warmup.observe(section);
 
-    // Aba em segundo plano: o navegador reduz o ritmo por conta própria,
-    // mas não solta o decodificador. Pausar solta.
+    /*
+      Aba em segundo plano: o navegador reduz o ritmo por conta própria, mas
+      não solta o decodificador. Pausar solta.
+
+      Na volta é preciso saber se a seção ainda está por perto, e o
+      observador não dispara de novo só porque a aba voltou — a geometria
+      não mudou. Daí a bandeira mantida pelo próprio callback acima.
+    */
     const onVisibility = () => {
       if (document.hidden) video.pause();
-      else if (playback.isActive) play();
+      else if (porPerto) play();
     };
     document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
-      warmup.kill();
-      playback.kill();
+      playback.disconnect();
+      warmup.disconnect();
       video.pause();
     };
   }, [ref]);
@@ -248,22 +253,37 @@ export function Parents() {
             única para escaloná-los. */}
         <ul className="grid gap-3 sm:gap-3.5 lg:ml-auto lg:w-full lg:max-w-xl xl:max-w-2xl 2xl:max-w-3xl">
           {PARENTS.benefits.map((benefit) => (
-            <li
-              key={benefit}
-              data-parent-item
-              /*
-                Sem `backdrop-blur` desde que o fundo virou vídeo: o filtro
-                é recalculado a cada quadro que entra atrás dele, seis vezes
-                (um por card), com a seção presa na tela. Foi a mesma troca
-                feita nos cards da Formação. A opacidade sobe de 70 para 80
-                para compensar a perda do desfoque na legibilidade.
-              */
-              className="flex items-start gap-3.5 rounded-2xl border border-white/70 bg-white/80 p-4 transition-colors duration-300 hover:bg-white sm:gap-4 sm:p-5"
-            >
-              <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-blush-100 text-blush-600">
-                <Check className="size-3.5" aria-hidden="true" />
-              </span>
-              <p className="text-sm leading-relaxed text-ink-700 sm:text-base">{benefit}</p>
+            /*
+              O `<li>` só carrega a animação de entrada, que é escrita em
+              `transform` pelo GSAP. O cartão e o seu hover ficam no wrapper
+              de dentro: transform de classe no mesmo nó seria apagado pelo
+              inline do GSAP assim que a entrada terminasse — mesma
+              separação usada nas peças de montar do Sobre e nos cartões da
+              Formação.
+            */
+            <li key={benefit} data-parent-item>
+              <div
+                /*
+                  Sem `backdrop-blur` desde que o fundo virou vídeo: o filtro
+                  é recalculado a cada quadro que entra atrás dele, seis
+                  vezes (uma por card), com a seção presa na tela. Foi a
+                  mesma troca feita nos cards da Formação. A opacidade sobe
+                  de 70 para 80 para compensar a perda do desfoque na
+                  legibilidade.
+
+                  No hover o cartão desliza um pouco para a direita e sobe,
+                  como se destacasse da pilha. O deslocamento lateral é o
+                  maior dos dois de propósito: a lista inteira entrou vindo
+                  da direita, então é esse o eixo que a seção já estabeleceu
+                  como o do movimento.
+                */
+                className="group flex items-start gap-3.5 rounded-2xl border border-white/70 bg-white/80 p-4 transition-[transform,background-color,box-shadow] duration-300 ease-out hover:-translate-y-0.5 hover:translate-x-1.5 hover:bg-white hover:shadow-[0_18px_40px_-22px_rgb(48_42_44_/_0.45)] sm:gap-4 sm:p-5"
+              >
+                <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-blush-100 text-blush-600 transition-transform duration-300 ease-out group-hover:scale-110">
+                  <Check className="size-3.5" aria-hidden="true" />
+                </span>
+                <p className="text-sm leading-relaxed text-ink-700 sm:text-base">{benefit}</p>
+              </div>
             </li>
           ))}
         </ul>

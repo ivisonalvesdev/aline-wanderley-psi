@@ -183,9 +183,21 @@ export function Hero({ introReady }: HeroProps) {
           */}
           {/* Só a partir de lg — no celular a logo é a do canto superior
               esquerdo, fora deste bloco. */}
+          {/*
+            O par `-mt` / `mb` é o que sobe a logo sem arrastar o título
+            junto. A margem negativa sozinha encurtaria o bloco, e como ele
+            é centralizado na vertical, a página devolveria metade da subida
+            empurrando tudo para baixo. Somando ao `mb` o mesmo tanto que se
+            tirou do topo, a altura total fica igual e só a logo se move.
+
+            As margens vão sem prefixo porque este bloco é `hidden lg:block`
+            — abaixo de lg ele não existe, e quem responde pela logo é o do
+            canto superior esquerdo. Só o `short` (notebook) é reafirmado,
+            que já vinha com o intervalo mais curto.
+          */}
           <div
             data-hero-item
-            className="relative mb-6 hidden aspect-[175/114] w-44 overflow-hidden drop-shadow-[0_2px_12px_rgb(48_42_44_/_0.4)] lg:block lg:w-56 xl:w-60 short:mb-4 short:w-40"
+            className="relative -mt-4 mb-10 hidden aspect-[175/114] w-44 overflow-hidden drop-shadow-[0_2px_12px_rgb(48_42_44_/_0.4)] lg:block lg:w-56 xl:w-60 short:mb-8 short:w-40"
           >
             <img
               src={logoAline}

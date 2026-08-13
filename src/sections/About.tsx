@@ -67,9 +67,28 @@ export function About() {
      */
     const swapStart = () => {
       const section = ref.current;
-      return section && section.offsetHeight > window.innerHeight * 0.96
-        ? "bottom bottom"
-        : "center center";
+      if (!section || section.offsetHeight <= window.innerHeight * 0.96) {
+        return "center center";
+      }
+
+      /*
+        Alinhar o fim da seção ao fim da tela deixa o começo dela para fora,
+        acima. Em notebook isso é sensível: a tela é larga o bastante para o
+        layout lado a lado, mas baixa, e o corte comia o topo da seção — era
+        a sensação de enquadramento "puxado para cima".
+
+        O `+=` desce o ponto de travamento: a seção prende com o fim um
+        pouco abaixo da borda inferior, o que devolve a mesma medida de
+        volta no topo. Não abre folga nenhuma, porque aqui a seção já é mais
+        alta que a tela — só troca o que fica de fora embaixo pelo que
+        estava faltando em cima.
+
+        A condição é a mesma da variante `short` do CSS (largura de lg com
+        tela baixa), que é onde o problema aparece. Em monitor grande a
+        seção cabe inteira e nem chega neste ramo.
+      */
+      const notebook = window.innerWidth >= 1024 && window.innerHeight <= 864;
+      return notebook ? "bottom bottom+=44" : "bottom bottom";
     };
 
     const buildSwap = (scrollTrigger: gsap.TimelineVars["scrollTrigger"]) => {
@@ -322,15 +341,24 @@ export function About() {
       },
     );
 
-    /* Respiração do selo: um vaivém de poucos pixels, lento o bastante
-       para ser percebido como flutuação e não como tremor. */
+    /*
+      Respiração do selo: um vaivém lento o bastante para ser percebido
+      como flutuação e não como tremor.
+
+      O percurso lateral é o dobro do vertical, e a duração cresceu junto.
+      É a razão entre as duas que decide se o movimento lê como suave: mais
+      distância no mesmo tempo viraria deslize apressado, então o curso
+      maior anda mais devagar e a velocidade de pico continua a mesma. O
+      `sine.inOut` completa o efeito ao tirar a partida e a chegada bruscas
+      de cada ida e volta.
+    */
     mm.add(MOTION_OK, () => {
       if (!badgeRef.current) return;
       gsap.to(badgeRef.current, {
-        x: 7,
-        y: -4,
-        rotation: -0.9,
-        duration: 3.8,
+        x: 14,
+        y: -5,
+        rotation: -1.1,
+        duration: 5,
         ease: "sine.inOut",
         yoyo: true,
         repeat: -1,
@@ -506,7 +534,7 @@ export function About() {
           <div
             ref={badgeRef}
             aria-hidden="true"
-            className="absolute -top-3.5 left-3 rounded-2xl border border-white/70 bg-white/88 px-3.5 py-2 text-center shadow-[0_20px_48px_-20px_rgb(48_42_44_/_0.28)] backdrop-blur-xl sm:-top-4 sm:left-6 sm:px-4 sm:py-2.5"
+            className="absolute -bottom-3.5 left-3 rounded-2xl border border-white/70 bg-white/88 px-3.5 py-2 text-center shadow-[0_20px_48px_-20px_rgb(48_42_44_/_0.28)] backdrop-blur-xl sm:-bottom-4 sm:left-6 sm:px-4 sm:py-2.5"
           >
             <span className="block font-display text-sm leading-none font-semibold tracking-[-0.01em] text-blush-600 sm:text-[0.9375rem]">
               {SITE.crp}

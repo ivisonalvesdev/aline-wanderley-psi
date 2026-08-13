@@ -46,8 +46,16 @@ const CONTACT_CHANNELS = [
     label: "Instagram",
     value: SITE.instagramHandle,
     href: SITE.instagramUrl,
-    /* O gradiente oficial do Instagram — a marca não tem cor chapada. */
-    tint: "bg-[linear-gradient(45deg,#f09433_0%,#dc2743_45%,#bc1888_100%)]",
+    /*
+      O gradiente do Instagram é radial, e não linear — a marca não tem cor
+      chapada nem rampa reta. A origem fica embaixo e à esquerda, fora do
+      quadrado (30% 107%), que é o que põe o amarelo no canto inferior e
+      leva o azul para a diagonal oposta. A versão linear de 45° que estava
+      aqui atravessava do laranja ao roxo em linha reta: as cores eram da
+      marca, mas o desenho lia como vermelho, sem o amarelo nem o azul que
+      tornam o ícone reconhecível de relance.
+    */
+    tint: "bg-[radial-gradient(circle_at_30%_107%,#fdf497_0%,#fdf497_5%,#fd5949_45%,#d6249f_60%,#285aeb_90%)]",
     external: true,
   },
   {
@@ -55,8 +63,17 @@ const CONTACT_CHANNELS = [
     label: "E-mail",
     value: SITE.email,
     href: `mailto:${SITE.email}`,
-    /* Sem marca para respeitar: fica no rosa da identidade. */
-    tint: "bg-blush-500",
+    /*
+      O endereço é do Gmail, e o vermelho é a cor primária da marca. Estava
+      no rosa da identidade — o único dos três que não vestia a própria cor,
+      justamente o oposto do que a linha acima diz.
+
+      O glifo continua sendo o envelope genérico do Lucide, e não o "M"
+      colorido do Gmail: o logotipo real só existe multicolorido sobre
+      branco, e um ladrilho branco no meio de dois saturados quebraria a
+      leitura da fileira.
+    */
+    tint: "bg-[#EA4335]",
     external: false,
   },
 ] as const;

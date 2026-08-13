@@ -152,6 +152,23 @@
     overflow-x: clip;
   }
 
+  /*
+    O preflight do Tailwind v4 deixou de aplicar `cursor: pointer` em
+    botões — a justificativa oficial é seguir o padrão do navegador, que
+    usa a seta. Na prática o site inteiro perdeu o retorno de "isto é
+    clicável" de uma vez, e num só lugar (o cartão do diploma, com
+    `cursor-zoom-in`) a classe havia sido escrita à mão.
+
+    Corrigir na base cobre os sete botões de uma vez e não deixa o próximo
+    nascer sem. Fica em `@layer base` de propósito: qualquer utilitário de
+    cursor escrito na marcação continua vencendo, porque utilities vêm
+    depois. O `:disabled` fica de fora — ali a seta é o retorno certo.
+  */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;

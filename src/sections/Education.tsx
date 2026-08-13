@@ -95,18 +95,33 @@ function CertificateCard({
     </div>
   );
 
+  /*
+    A cadeia de `flex` daqui até o cartão existe para os dois ficarem do
+    mesmo tamanho.
+
+    As legendas têm alturas diferentes — "Especialização em Terapia
+    Cognitivo-Comportamental" ocupa duas linhas onde "Bacharelado em
+    Psicologia" ocupa uma —, e sem isso cada cartão parava na altura do
+    próprio conteúdo. O `<li>` já era esticado pela grade; o que faltava era
+    repassar essa altura para dentro, o que `display: flex` faz sem depender
+    de porcentagem resolver contra pai de altura implícita.
+
+    A sobra vai para o documento (`grow` no quadro da imagem), e não para um
+    vazio no rodapé do cartão: é o diploma que cresce até empatar com o
+    vizinho, que era o pedido.
+  */
   return (
-    <li data-formacao-card>
-      <div ref={magnetRef}>
+    <li data-formacao-card className="flex">
+      <div ref={magnetRef} className="flex w-full">
         {certificate.pending || !image ? (
-          <div className={cn(CARD_SURFACE, "p-4")}>
+          <div className={cn(CARD_SURFACE, "flex w-full flex-col p-4")}>
             {/*
               O segundo espaço existe antes do documento para que a seção
               não precise ser rediagramada quando ele chegar — e porque um
               par de cartões lê como percurso em andamento, enquanto um
               cartão só lê como percurso encerrado.
             */}
-            <div className="flex aspect-[4/3] flex-col items-center justify-center gap-2.5 rounded-xl border border-dashed border-blush-300/70 bg-blush-50/60 px-4 text-center">
+            <div className="flex aspect-[4/3] grow flex-col items-center justify-center gap-2.5 rounded-xl border border-dashed border-blush-300/70 bg-blush-50/60 px-4 text-center">
               <Hourglass className="size-5 text-blush-500" aria-hidden="true" />
               <p className="font-alt text-xs font-medium tracking-[0.02em] text-blush-700">
                 Certificado a caminho
@@ -121,10 +136,10 @@ function CertificateCard({
             aria-label={`Ampliar o diploma de ${certificate.course}`}
             className={cn(
               CARD_SURFACE,
-              "group block w-full cursor-zoom-in p-4 text-left transition-shadow duration-300 hover:shadow-[0_34px_76px_-28px_rgb(48_42_44_/_0.6)]",
+              "group flex w-full cursor-zoom-in flex-col p-4 text-left transition-shadow duration-300 hover:shadow-[0_34px_76px_-28px_rgb(48_42_44_/_0.6)]",
             )}
           >
-            <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-white ring-1 ring-mist-200">
+            <div className="relative aspect-[4/3] grow overflow-hidden rounded-xl bg-white ring-1 ring-mist-200">
               <img
                 src={image}
                 alt={`Diploma de ${certificate.course}, emitido pelo ${certificate.institution}`}
@@ -286,7 +301,22 @@ export function Education() {
           // velhas.
           refreshPriority: 1,
           onEnter: () => entrance.play(0),
-          onEnterBack: () => entrance.play(0),
+          /*
+            Subindo, a entrada é posta direto no fim em vez de tocada de
+            novo — era daqui que vinha a piscada.
+
+            `onEnterBack` dispara ao reentrar pelo lado de baixo, e nesse
+            instante a seção já está à vista com os cartões desenhados. Um
+            `play(0)` os devolvia ao quadro zero, onde o `autoAlpha` é 0 e
+            escreve `visibility: hidden`: eles sumiam e voltavam a entrar
+            com a pessoa olhando. `progress(1)` chega ao mesmo estado final
+            sem passar pelo início.
+
+            Reapresentar a animação continua acontecendo, mas só pelo
+            `onLeaveBack` logo abaixo — que é quando a seção saiu de cena
+            por cima e a próxima descida é uma chegada de verdade.
+          */
+          onEnterBack: () => entrance.progress(1),
           onLeaveBack: () => {
             entrance.pause(0);
             gsap.set(hidden, { autoAlpha: 0, y: 22 });
