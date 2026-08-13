@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "@/utils/gsap";
 import { usePrefersReducedMotion } from "@/hooks/useMediaQuery";
 import { SITE } from "@/constants/site";
+import logoAline from "@assets/logo-maior.webp";
 
 interface PreloaderProps {
   onComplete: () => void;
@@ -162,7 +163,29 @@ export function Preloader({ onComplete }: PreloaderProps) {
       aria-label="Carregando o site"
       className="fixed inset-0 z-100 flex flex-col items-center justify-center gap-7 bg-white"
     >
-      <div className="flex flex-col items-center gap-3">
+      {/*
+        Ladrilho da logo cobrindo a cortina inteira.
+
+        O PNG da marca já tem margem transparente própria, então repetir o
+        arquivo cru: o espaçamento entre uma logo e outra sai do próprio
+        desenho, sem precisar de moldura.
+
+        Fica fora do `data-preloader-fade` de propósito. Aquela animação
+        leva `autoAlpha` até 1, e a graça aqui é justamente a opacidade
+        baixíssima — entrar no grupo apagaria o efeito ao acender a marca
+        d'água em cima do conteúdo.
+      */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.16]"
+        style={{
+          backgroundImage: `url(${logoAline})`,
+          backgroundSize: "150px auto",
+          backgroundRepeat: "repeat",
+        }}
+      />
+
+      <div className="relative flex flex-col items-center gap-3">
         {/* A Halimun é a assinatura da identidade — o lugar certo para
             ela é este: uma aparição só, em corpo grande, antes do site. */}
         <p
@@ -176,7 +199,7 @@ export function Preloader({ onComplete }: PreloaderProps) {
         </p>
       </div>
 
-      <div data-preloader-fade className="flex w-44 flex-col gap-2.5 opacity-0 sm:w-56">
+      <div data-preloader-fade className="relative flex w-44 flex-col gap-2.5 opacity-0 sm:w-56">
         <div className="h-px w-full overflow-hidden bg-mist-200">
           <div
             ref={barRef}

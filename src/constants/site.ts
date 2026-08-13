@@ -15,6 +15,9 @@ export const SITE = {
   url: "https://alinewanderley.com.br",
   /** DDI + DDD + número, só dígitos: +55 (81) 9 9698-2391 */
   whatsappNumber: "5581996982391",
+  /** O mesmo número, como se lê. Vizinho do original de propósito: são
+      duas formas do mesmo dado e precisam ser corrigidas juntas. */
+  whatsappDisplay: "(81) 99698-2391",
   whatsappMessage:
     "Olá, Aline! Encontrei o seu site e gostaria de saber mais sobre o atendimento.",
   instagramHandle: "@psialinewandeerley",

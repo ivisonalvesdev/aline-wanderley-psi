@@ -7,3 +7,8 @@ dist
 # PNGs originais das fotos, mantidos localmente como backup — o site usa
 # as versões .webp em assets/. Peso alto (4,8 MB) sem necessidade no repo.
 assets/originais-png/
+
+# Original do vídeo da seção Formação (7 MB, 720p). O site usa o resultado
+# de `npm run video` — assets/formacao.mp4, em 1080p e três vezes menor.
+# Ver scripts/build-formacao-video.mjs.
+assets/video-origem/

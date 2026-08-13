@@ -95,6 +95,12 @@
 
   --animate-float: float 7s ease-in-out infinite;
   --animate-fade-in: fade-in 1.6s ease-out both;
+  /* Mesma curva do `fade-in`, no tempo de uma sobreposição: a ampliação
+     do diploma responde a um clique e precisa parecer imediata. Existe
+     como token próprio porque `@keyframes` declarado aqui dentro só é
+     emitido quando um `--animate-*` o referencia — em valor arbitrário
+     (`animate-[fade-in_0.25s]`) a regra não chegaria ao CSS final. */
+  --animate-fade-in-fast: fade-in 0.25s ease-out both;
   /* Halo do botão flutuante do WhatsApp — dois anéis defasados */
   --animate-pulse-ring: pulse-ring 2.6s cubic-bezier(0.24, 0, 0.38, 1) infinite;
 
@@ -199,9 +205,9 @@
     @apply bg-blush-200 text-ink-900;
   }
 
-  /* Folga do header fixo (h-20 / sm:h-24) ao pular por âncora */
+  /* Folga do header fixo (h-16 / sm:h-[4.5rem]) ao pular por âncora */
   section[id] {
-    scroll-margin-top: 7rem;
+    scroll-margin-top: 5.5rem;
   }
 
   /* Estados de foco visíveis — navegação por teclado */
@@ -473,18 +479,28 @@
  * banding aparece primeiro, em faixas horizontais no céu e nas paredes.
  */
 @utility hero-veil {
+  /*
+    No celular a foto é vertical: a Aline ocupa o terço superior e o texto
+    fica no rodapé, sobre a bancada. São duas exigências opostas na mesma
+    imagem — em cima, mostrar o rosto; embaixo, sustentar texto branco.
+
+    Por isso a curva é assimétrica. O topo quase não escurece (0.06), o
+    suficiente para o cabeçalho não sumir, e o fechamento acontece do meio
+    para baixo, onde não há mais foto a preservar. A versão anterior
+    começava em 0.58 e velava justamente o rosto.
+  */
   background-image: linear-gradient(
     180deg,
-    rgb(48 42 44 / 0.58) 0%,
-    rgb(48 42 44 / 0.5) 10%,
-    rgb(48 42 44 / 0.4) 20%,
-    rgb(48 42 44 / 0.3) 32%,
-    rgb(48 42 44 / 0.22) 44%,
-    rgb(48 42 44 / 0.2) 54%,
-    rgb(48 42 44 / 0.26) 66%,
-    rgb(48 42 44 / 0.34) 78%,
-    rgb(48 42 44 / 0.42) 88%,
-    rgb(48 42 44 / 0.5) 100%
+    rgb(48 42 44 / 0.06) 0%,
+    rgb(48 42 44 / 0.05) 12%,
+    rgb(48 42 44 / 0.05) 26%,
+    rgb(48 42 44 / 0.08) 38%,
+    rgb(48 42 44 / 0.16) 48%,
+    rgb(48 42 44 / 0.3) 58%,
+    rgb(48 42 44 / 0.44) 68%,
+    rgb(48 42 44 / 0.56) 78%,
+    rgb(48 42 44 / 0.64) 88%,
+    rgb(48 42 44 / 0.7) 100%
   );
 
   @media (width >= 64rem) {
@@ -501,6 +517,52 @@
       rgb(48 42 44 / 0.09) 75%,
       rgb(48 42 44 / 0.04) 83%,
       rgb(48 42 44 / 0) 92%
+    );
+  }
+}
+
+/**
+ * Véu de contraste da seção Formação — o espelho do `hero-veil`.
+ *
+ * Aqui a Aline está à esquerda do vídeo e o conteúdo à direita, então a
+ * sombra corre no sentido inverso: limpa à esquerda, fechando à direita.
+ *
+ * A tinta é um ameixa escuro (rgb 78 30 45) tirado do fim da rampa blush,
+ * e não o `ink-900` do hero. Sobre um vídeo de tons pastel, cinza neutro
+ * suja os rosas e o resultado lê como foto desbotada; puxar a sombra para
+ * o mesmo lado do círculo cromático mantém o ambiente quente.
+ *
+ * As paradas são muitas pelo mesmo motivo do hero: degradê longo de baixo
+ * contraste é onde o banding de 8 bits aparece primeiro.
+ */
+@utility formacao-veil {
+  background-image: linear-gradient(
+    180deg,
+    rgb(78 30 45 / 0.62) 0%,
+    rgb(78 30 45 / 0.55) 12%,
+    rgb(78 30 45 / 0.46) 24%,
+    rgb(78 30 45 / 0.4) 36%,
+    rgb(78 30 45 / 0.42) 48%,
+    rgb(78 30 45 / 0.52) 62%,
+    rgb(78 30 45 / 0.64) 74%,
+    rgb(78 30 45 / 0.74) 86%,
+    rgb(78 30 45 / 0.82) 100%
+  );
+
+  @media (width >= 64rem) {
+    background-image: linear-gradient(
+      90deg,
+      rgb(78 30 45 / 0) 0%,
+      rgb(78 30 45 / 0.05) 10%,
+      rgb(78 30 45 / 0.12) 20%,
+      rgb(78 30 45 / 0.22) 30%,
+      rgb(78 30 45 / 0.35) 40%,
+      rgb(78 30 45 / 0.5) 50%,
+      rgb(78 30 45 / 0.63) 60%,
+      rgb(78 30 45 / 0.73) 70%,
+      rgb(78 30 45 / 0.8) 80%,
+      rgb(78 30 45 / 0.85) 90%,
+      rgb(78 30 45 / 0.87) 100%
     );
   }
 }

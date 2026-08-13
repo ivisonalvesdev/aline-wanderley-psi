@@ -9,9 +9,13 @@ import logoAline from "@assets/logo-maior.webp";
 /**
  * Header sticky com glassmorphism leve e scroll inteligente:
  * esconde ao rolar para baixo, reaparece ao rolar para cima.
+ *
+ * Dentro do hero ele não existe: quem assina a marca ali é a logo grande,
+ * e o cabeçalho por cima da foto competia com ela. Só a partir do fim do
+ * hero é que ele passa a aparecer.
  */
 export function Header() {
-  const [scrolled, setScrolled] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const lastY = useRef(0);
@@ -24,14 +28,26 @@ export function Header() {
       ticking = true;
       requestAnimationFrame(() => {
         const y = window.scrollY;
-        setScrolled(y > 24);
-        // Só esconde depois de passar do hero e rolando para baixo
-        setHidden(y > 480 && y > lastY.current);
+
+        /*
+          O hero é `min-h-svh`, então sua altura é a da janela — medir pelo
+          elemento em vez de fixar um número mantém o limiar certo em
+          telas baixas, onde um valor cravado cairia dentro ou muito depois
+          do hero. A folga de 88px antecipa a troca para que o cabeçalho já
+          esteja posto quando a seção seguinte encosta no topo.
+         */
+        const hero = document.getElementById("inicio");
+        const heroEnd = (hero?.offsetHeight ?? window.innerHeight) - 88;
+
+        setPastHero(y > heroEnd);
+        // Depois do hero, esconde ao descer e devolve ao subir.
+        setHidden(y > heroEnd && y > lastY.current);
         lastY.current = y;
         ticking = false;
       });
     };
 
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -55,30 +71,57 @@ export function Header() {
   }, [menuOpen]);
 
   /**
-   * No topo o header flutua sobre a foto escura do hero — texto claro.
-   * Ao rolar (ou com o menu aberto) o fundo vira vidro branco — texto escuro.
+   * Sobre o hero o cabeçalho não tem fundo: a foto é a capa da marca, e
+   * qualquer faixa ali corta a imagem em duas. Só a navegação fica, em
+   * tinta clara. Passado o hero, o vidro branco entra e a tinta escurece.
+   *
+   * De quebra, não pintar nada sobre o hero também poupa o desfoque no
+   * trecho mais pesado da página.
    */
-  const onDark = !scrolled && !menuOpen;
+  const onDark = !pastHero && !menuOpen;
+
+  /**
+   * Sai de cena só ao descer, e nunca dentro do hero.
+   *
+   * O `focus-within` do JSX abaixo é o que impede isto de virar uma
+   * armadilha de teclado: sem ele, quem navega por Tab alcançaria os links
+   * do menu enquanto o cabeçalho está deslocado para fora da tela, e o
+   * foco sumiria de vista.
+   */
+  const offscreen = hidden && !menuOpen;
 
   return (
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-80 transition-all duration-500 ease-out",
-        hidden && !menuOpen ? "-translate-y-full" : "translate-y-0",
-        menuOpen
-          ? "border-b border-white/40 bg-white/90 shadow-[0_8px_32px_-16px_rgb(48_42_44_/_0.12)] backdrop-blur-xl"
-          : scrolled
-            ? "border-b border-white/40 bg-white/70 shadow-[0_8px_32px_-16px_rgb(48_42_44_/_0.12)] backdrop-blur-xl"
-            : "bg-transparent",
+        /*
+          Fora do hero o desfoque é `md` (12px), não `xl` (24px), e o branco
+          vai a 85%.
+
+          Esta barra é fixa: a cada quadro de rolagem o navegador refaz o
+          `backdrop-filter` sobre o que passa atrás — e na seção Formação o
+          que passa atrás é vídeo em reprodução, ou seja, conteúdo novo a
+          cada quadro. O custo do desfoque cresce com o raio, então metade
+          do raio é aproximadamente metade do trabalho por quadro. O branco
+          mais opaco compensa a perda de leitura do vidro.
+        */
+        onDark
+          ? "bg-transparent"
+          : "border-b border-white/40 bg-white/85 shadow-[0_8px_32px_-16px_rgb(48_42_44_/_0.12)] backdrop-blur-md",
+        menuOpen && "bg-white/95",
+        offscreen ? "-translate-y-full focus-within:translate-y-0" : "translate-y-0",
       )}
     >
-      <div className="container-page flex h-20 items-center justify-between gap-4 sm:h-24 short:h-20">
-        {/*
-          Logo — só entra depois que o hero sai de cena. No topo da página
-          quem assina a marca é a logo grande do hero; repeti-la aqui seria
-          redundante. O elemento continua ocupando espaço (apenas invisível)
-          para não desalinhar o `justify-between` do cabeçalho.
-        */}
+      {/* Barra enxuta: a logo é o elemento mais alto aqui dentro, então a
+          altura da faixa é ditada por ela — 64px deixam ~6px de respiro
+          acima e abaixo do desenho, o mínimo antes de a marca começar a
+          parecer espremida contra as bordas. */}
+      <div className="container-page flex h-16 items-center justify-between gap-4 sm:h-[4.5rem] short:h-16">
+        {/* Dentro do hero a logo some: a capa já traz a marca em corpo
+            grande — no desktop ao lado do título, no celular no canto
+            superior esquerdo —, e repeti-la aqui a duplicaria na mesma
+            tela. O elemento continua ocupando espaço, apenas invisível,
+            para não desalinhar o `justify-between` do cabeçalho. */}
         <a
           href="#inicio"
           aria-label={`${SITE.name} — voltar ao início`}
@@ -90,7 +133,7 @@ export function Header() {
           )}
         >
           {/* Recorte da margem transparente do PNG — ver comentário no Hero */}
-          <div className="relative aspect-[175/114] w-24 overflow-hidden sm:w-28 short:w-24">
+          <div className="relative aspect-[175/114] w-20 overflow-hidden sm:w-24 short:w-20">
             <img
               src={logoAline}
               alt="Aline Wanderley — Psicóloga"
@@ -112,7 +155,10 @@ export function Header() {
                     // a troca de família marca essa diferença de função.
                     "group relative font-alt text-[0.8125rem] font-medium tracking-[0.04em] transition-colors duration-300",
                     onDark
-                      ? "text-white/85 hover:text-white"
+                      ? // A sombra é o que garante a leitura sobre a foto:
+                        // o hero tem trechos claros, e texto branco puro
+                        // sumiria neles.
+                        "text-white/90 [text-shadow:0_1px_10px_rgb(48_42_44_/_0.55)] hover:text-white"
                       : "text-ink-700 hover:text-ink-900",
                   )}
                 >
@@ -169,7 +215,9 @@ export function Header() {
           {/* Rola internamente quando a viewport é baixa (mobile em paisagem) */}
           <nav
             aria-label="Navegação móvel"
-            className="container-page max-h-[calc(100svh-5rem)] overflow-y-auto overscroll-contain pb-6 sm:max-h-[calc(100svh-6rem)]"
+            /* Os descontos acompanham a altura da barra (4rem / 4.5rem):
+               é o que sobra de tela para a lista rolar por dentro. */
+            className="container-page max-h-[calc(100svh-4rem)] overflow-y-auto overscroll-contain pb-6 sm:max-h-[calc(100svh-4.5rem)]"
           >
             <ul className="border-soft-t flex flex-col gap-1 pt-4">
               {NAV_LINKS.map((link, i) => (

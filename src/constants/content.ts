@@ -45,7 +45,7 @@ export const CTA_LABEL_SHORT = "Falar no WhatsApp";
 /* ---------------------------------- */
 export const ABOUT = {
   eyebrow: "Quem cuida",
-  title: "Prazer, eu sou a **Aline Wanderley**.",
+  title: "Prazer, eu sou a **Aline Wanderley.**",
   paragraphs: [
     "Psicóloga clínica e acredito que **a infância é o lugar onde nascem as emoções que levamos para a vida inteira**. Por isso, dedico meu trabalho a acolher crianças, adolescentes, adultos e também as famílias que caminham ao lado deles.",
     "Minha prática é fundamentada na **Terapia Cognitivo-Comportamental (TCC)**, uma abordagem com ampla base científica, que une técnica e sensibilidade para compreender como pensamentos, emoções e comportamentos se conectam.",
@@ -135,7 +135,7 @@ export const TCC_STEPS = [
     number: "01",
     title: "O que é",
     description:
-      "A Terapia Cognitivo-Comportamental é uma das abordagens mais estudadas da psicologia. Ela parte de um princípio simples: **a forma como interpretamos as situações influencia o que sentimos e como agimos**.",
+      "A Terapia Cognitivo-Comportamental é uma das abordagens mais estudadas da psicologia. Ela parte de um princípio simples: **a forma como interpretamos as situações influencia o que sentimos e como agimos.**",
   },
   {
     number: "02",
@@ -156,7 +156,7 @@ export const TCC_STEPS = [
 /* ---------------------------------- */
 export const PARENTS = {
   eyebrow: "Orientação parental",
-  title: "Cuidar de quem cuida **também é terapia**.",
+  title: "Cuidar de quem cuida **também é terapia.**",
   description:
     "Você não precisa passar pelos desafios da maternidade ou paternidade sem apoio. A orientação parental oferece **ferramentas práticas** para lidar com birras, rotina e emoções, fortalecendo o vínculo com seu filho.",
   benefits: [
@@ -268,28 +268,43 @@ export const DIFFERENTIALS = [
 /*  Formação — timeline               */
 /*  TODO: revisar/completar com dados reais da Aline  */
 /* ---------------------------------- */
-export const EDUCATION = [
-  {
-    period: "Graduação",
-    title: "Bacharelado em Psicologia",
-    description: "Formação clínica com ênfase em desenvolvimento humano e psicologia infantil.",
-  },
-  {
-    period: "Especialização",
-    title: "Terapia Cognitivo-Comportamental",
-    description: "Formação aprofundada na abordagem TCC aplicada à clínica de crianças e adultos.",
-  },
-  {
-    period: "Formação continuada",
-    title: "Psicologia Infantojuvenil",
-    description: "Estudos em desenvolvimento infantil, TDAH, TEA e parentalidade.",
-  },
-  {
-    period: "Atualização constante",
-    title: "Cursos, supervisões e congressos",
-    description: "Aprimoramento contínuo para oferecer um cuidado sempre atual e baseado em evidências.",
-  },
-] as const;
+/**
+ * Certificados reais, conferidos no diploma físico.
+ *
+ * A versão anterior desta seção era uma linha do tempo de quatro entradas
+ * genéricas, escritas antes de haver documento em mãos. Foram removidas de
+ * propósito: numa página de profissional de saúde, formação declarada sem
+ * comprovante é exatamente o tipo de alegação que o visitante desconta.
+ *
+ * O segundo espaço já existe no layout mesmo sem o diploma ter chegado —
+ * quando a Unibra emitir, é só preencher `image` e trocar `pending` para
+ * `false`, sem mexer no componente.
+ */
+export const EDUCATION = {
+  eyebrow: "Formação",
+  title: "Uma trajetória dedicada ao **cuidado**",
+  description:
+    "Estudo contínuo para oferecer uma prática clínica atual, ética e baseada em evidências.",
+  certificates: [
+    {
+      id: "psicologia",
+      course: "Bacharelado em Psicologia",
+      institution: "Centro Universitário FBV Wyden",
+      place: "Recife, PE",
+      /* Colação de grau em 30/11/2021; diploma expedido em 08/12/2021. */
+      year: "2021",
+      pending: false,
+    },
+    {
+      id: "tcc",
+      course: "Especialização em Terapia Cognitivo-Comportamental",
+      institution: "Unibra",
+      place: "Recife, PE",
+      year: "Em breve",
+      pending: true,
+    },
+  ],
+} as const;
 
 /* ---------------------------------- */
 /*  FAQ                               */
@@ -304,7 +319,7 @@ export { FAQ_ITEMS, type FaqItem } from "./faq";
 /* ---------------------------------- */
 export const FINAL_CTA = {
   title:
-    "O primeiro passo costuma ser o mais difícil. Ele também pode ser **o mais transformador**.",
+    "O primeiro passo costuma ser o mais difícil. Ele também pode ser **o mais transformador.**",
   description:
     "Se algo dentro de você — ou na vida de quem você ama está pedindo cuidado, estou aqui para acolher essa história. Vamos conversar?",
   buttonLabel: CTA_LABEL,

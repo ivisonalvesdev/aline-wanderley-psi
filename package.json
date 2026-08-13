@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "video": "node scripts/build-formacao-video.mjs"
   },
   "dependencies": {
     "@fontsource-variable/montserrat": "^5.3.0",
@@ -24,6 +25,8 @@
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.185.1",
     "@vitejs/plugin-react": "^6.0.4",
+    "ffmpeg-static": "^5.3.0",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.1.5"

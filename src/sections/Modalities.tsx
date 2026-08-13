@@ -1,8 +1,65 @@
-import { Check, ArrowUpRight, MapPin } from "lucide-react";
+import { Check, ArrowUpRight, MapPin, Mail } from "lucide-react";
 import { MODALITIES, MODALITY_FACTS } from "@/constants/content";
-import { whatsappUrl, FULL_ADDRESS, MAP_EMBED_URL, MAP_LINK_URL, SITE } from "@/constants/site";
+import {
+  whatsappUrl,
+  WHATSAPP_URL,
+  FULL_ADDRESS,
+  MAP_EMBED_URL,
+  MAP_LINK_URL,
+  SITE,
+} from "@/constants/site";
 import { SectionHeading } from "@/components/SectionHeading";
+import { InstagramIcon } from "@/components/icons/InstagramIcon";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { useReveal } from "@/hooks/useReveal";
+import { cn } from "@/utils/cn";
+
+/**
+ * Canais de contato do cartão de informações práticas.
+ *
+ * Cada item repete a estrutura dos fatos logo acima — chip de ícone,
+ * rótulo miúdo, valor — e não por economia de código: as duas fileiras
+ * dividem o mesmo cartão, e formatos diferentes lado a lado leriam como
+ * dois blocos colados por engano. Com a mesma grade de três colunas, o
+ * conjunto vira uma tabela só, de operação em cima e contato embaixo.
+ *
+ * O valor é o dado real (número, arroba, endereço) em vez de um rótulo
+ * como "Chamar agora": quem está decidindo quer ver com o que está
+ * lidando antes de clicar.
+ *
+ * As cores são as das próprias marcas, escritas como valor literal em vez
+ * de token da paleta: elas não pertencem à identidade da Aline e não devem
+ * acompanhar uma eventual mudança de paleta — se o rosa da marca mudar, o
+ * verde do WhatsApp continua sendo o verde do WhatsApp.
+ */
+const CONTACT_CHANNELS = [
+  {
+    icon: WhatsAppIcon,
+    label: "WhatsApp",
+    value: SITE.whatsappDisplay,
+    href: WHATSAPP_URL,
+    tint: "bg-[#25D366]",
+    external: true,
+  },
+  {
+    icon: InstagramIcon,
+    label: "Instagram",
+    value: SITE.instagramHandle,
+    href: SITE.instagramUrl,
+    /* O gradiente oficial do Instagram — a marca não tem cor chapada. */
+    tint: "bg-[linear-gradient(45deg,#f09433_0%,#dc2743_45%,#bc1888_100%)]",
+    external: true,
+  },
+  {
+    icon: Mail,
+    label: "E-mail",
+    value: SITE.email,
+    href: `mailto:${SITE.email}`,
+    /* Sem marca para respeitar: fica no rosa da identidade. */
+    tint: "bg-blush-500",
+    external: false,
+  },
+] as const;
 
 export function Modalities() {
   const ref = useReveal<HTMLElement>();
@@ -15,15 +72,15 @@ export function Modalities() {
       className="section-y surface-soft"
     >
       <div className="container-page">
-        {/* Único destaque da página fora do rosa: aqui as palavras marcadas
-            são os dois formatos de atendimento, e o azul da marca é o que
-            os liga aos ícones dos cards logo abaixo — que já usam essa cor.
-            Em rosa, o título apontaria para um lado e os cards para outro. */}
+        {/* O rosa aqui é o `blush-500`, não o `blush-600` padrão dos
+            destaques: sobre branco ele fica em ~3,2:1, suficiente para
+            texto grande como este título e mais próximo do pastel da
+            identidade. Em corpo de texto o mesmo tom reprovaria. */}
         <SectionHeading
           eyebrow="Modalidades"
           title="**Presencial** no Recife ou **online,** no seu ritmo"
           description="O mesmo cuidado, a mesma escuta — no formato que faz mais sentido para a sua rotina."
-          className="[--rich-accent:var(--color-cloud-500)]"
+          className="[--rich-accent:var(--color-blush-500)]"
         />
 
         <div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:mt-14 sm:gap-6 md:grid-cols-2">
@@ -106,22 +163,80 @@ export function Modalities() {
           reembolso. Deixar isso à vista evita que a dúvida vire
           desistência silenciosa.
         */}
-        <dl
+        <div
           data-reveal
-          className="mx-auto mt-6 grid max-w-5xl gap-4 rounded-3xl border border-mist-200 bg-white/70 p-6 backdrop-blur-sm sm:mt-6 sm:grid-cols-3 sm:gap-6 sm:p-8"
+          className="mx-auto mt-6 max-w-5xl rounded-3xl border border-mist-200 bg-white/70 p-6 backdrop-blur-sm sm:mt-6 sm:p-8"
         >
-          {MODALITY_FACTS.map(({ icon: Icon, label, value }) => (
-            <div key={label} className="flex items-start gap-3.5">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-cloud-100 text-cloud-500">
-                <Icon className="size-4.5" aria-hidden="true" />
-              </span>
-              <div>
-                <dt className="eyebrow text-[10px] text-ink-500">{label}</dt>
-                <dd className="mt-1.5 text-sm font-medium text-ink-900">{value}</dd>
+          {/*
+            Contatos diretos, no mesmo cartão do operacional — e acima dele.
+
+            A ordem é intencional: a seção inteira vem tratando de "como
+            funciona", e o cartão fecha esse assunto. Pôr o canal de contato
+            primeiro faz a leitura terminar no operacional, que é
+            informação de apoio; com o contato no topo, a última coisa lida
+            antes de rolar é o convite para falar.
+
+            Cada marca fica na sua própria cor, e não no rosa da paleta:
+            ícone de rede social é reconhecido pela cor antes de ser lido,
+            e recolorir o Instagram de rosa custaria justamente a
+            identificação instantânea que ele carrega.
+          */}
+          {/* `blush-400` é o rosa pastel da rampa: sobre o branco do cartão
+              ele fica claro sem sumir, porque o `eyebrow` é caixa alta com
+              tracking largo — desenho que aguenta pouco contraste melhor
+              que texto corrido. */}
+          <p className="eyebrow text-blush-400">Entre em contato</p>
+
+          <ul className="mt-4 grid gap-4 sm:grid-cols-3 sm:gap-6">
+            {CONTACT_CHANNELS.map(({ icon: Icon, label, value, href, tint, external }) => (
+              <li key={label}>
+                <a
+                  href={href}
+                  {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className="group -m-2 flex items-start gap-3.5 rounded-2xl p-2 transition-colors duration-300 hover:bg-blush-50/70"
+                >
+                  <span
+                    className={cn(
+                      "flex size-10 shrink-0 items-center justify-center rounded-xl text-white transition-transform duration-300 group-hover:scale-105",
+                      tint,
+                    )}
+                  >
+                    <Icon className="size-4.5" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="eyebrow block text-[10px] text-ink-500">{label}</span>
+                    {/* `break-words` porque o e-mail é a linha mais longa
+                        das seis e, num terço da largura, seria o único
+                        item a estourar a coluna. */}
+                    <span className="mt-1.5 block text-sm font-medium break-words text-ink-900 transition-colors duration-300 group-hover:text-blush-600">
+                      {value}
+                    </span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          {/*
+            O operacional que trava a decisão de quem nunca fez terapia:
+            quanto dura, de quanto em quanto tempo e se dá para pedir
+            reembolso. Deixar isso à vista evita que a dúvida vire
+            desistência silenciosa.
+          */}
+          <dl className="border-soft-t mt-6 grid gap-4 pt-6 sm:grid-cols-3 sm:gap-6">
+            {MODALITY_FACTS.map(({ icon: Icon, label, value }) => (
+              <div key={label} className="flex items-start gap-3.5">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blush-100 text-blush-500">
+                  <Icon className="size-4.5" aria-hidden="true" />
+                </span>
+                <div>
+                  <dt className="eyebrow text-[10px] text-ink-500">{label}</dt>
+                  <dd className="mt-1.5 text-sm font-medium text-ink-900">{value}</dd>
+                </div>
               </div>
-            </div>
-          ))}
-        </dl>
+            ))}
+          </dl>
+        </div>
 
         <p data-reveal className="mx-auto mt-5 max-w-5xl text-center text-sm text-ink-500">
           Ainda com dúvida sobre qual formato combina com a sua rotina?{" "}
