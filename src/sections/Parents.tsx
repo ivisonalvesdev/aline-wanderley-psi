@@ -4,10 +4,113 @@ import { PARENTS } from "@/constants/content";
 import { WhatsAppCta } from "@/components/WhatsAppCta";
 import { useReveal } from "@/hooks/useReveal";
 import { rich } from "@/utils/rich";
-import { gsap } from "@/utils/gsap";
+import { gsap, ScrollTrigger, MOTION_OK } from "@/utils/gsap";
+import parentalVideo from "@assets/orientacao-parental.mp4";
 
 export function Parents() {
   const ref = useReveal<HTMLElement>();
+
+  /**
+   * Ciclo de vida do vídeo de fundo.
+   *
+   * Fica separado da timeline de entrada de propósito: a lista é animada só
+   * onde há `prefers-reduced-motion: no-preference`, e o vídeo tem regra
+   * própria — quem pediu menos movimento continua vendo o cenário, parado.
+   */
+  useLayoutEffect(() => {
+    const section = ref.current;
+    if (!section) return;
+
+    const video = section.querySelector<HTMLVideoElement>("[data-parental-video]");
+    if (!video) return;
+
+    if (!MOTION_OK) {
+      // Sem animação o vídeo vira fotografia: carrega o suficiente para o
+      // primeiro quadro pintar e para por aí.
+      video.preload = "metadata";
+      video.load();
+      return;
+    }
+
+    // O atributo no JSX já basta para os navegadores atuais, mas o autoplay
+    // só é liberado se a propriedade estiver de pé no momento do `play()`.
+    video.muted = true;
+    video.loop = true;
+
+    const play = () => void video.play().catch(() => {});
+    const download = () => {
+      if (video.preload === "auto") return;
+      video.preload = "auto";
+      video.load();
+    };
+
+    /*
+      O arquivo não pode sair junto com o resto da página: a seção fica no
+      meio do documento e quem não chega nela não deveria pagar por ela. O
+      download começa a duas telas de distância — não uma: ele precisa
+      terminar antes do gatilho de baixo, que é quem manda tocar.
+    */
+    const warmup = ScrollTrigger.create({
+      trigger: section,
+      start: "top bottom+=200%",
+      once: true,
+      onEnter: download,
+    });
+
+    /**
+     * Quando o vídeo toca — e o que ele deliberadamente ignora.
+     *
+     * A rolagem não conduz o vídeo: não há `scrub`, o loop corre no ritmo
+     * dele e a página não tem voz sobre em que quadro ele está. O que a
+     * rolagem decide é só uma coisa: se vale a pena manter um decodificador
+     * de vídeo aberto neste momento.
+     *
+     * E essa decisão é tomada com uma tela inteira de antecedência de cada
+     * lado (`bottom+=100%` e `top-=100%`). É essa folga que separa "toca
+     * quando aparece" de "já está tocando quando aparece": o loop começa
+     * enquanto a seção ainda está fora de quadro, então na hora em que ela
+     * entra — descendo ou subindo — o movimento já está em curso, sem o
+     * primeiro quadro congelado denunciando o truque.
+     *
+     * A pausa só acontece a uma tela de distância, longe o suficiente para
+     * ninguém ver, e existe para o vídeo não ficar decodificando no fundo
+     * enquanto o usuário está em outra parte da página.
+     */
+    const playback = ScrollTrigger.create({
+      trigger: section,
+      start: "top bottom+=100%",
+      end: "bottom top-=100%",
+      onEnter: play,
+      onEnterBack: play,
+      onLeave: () => video.pause(),
+      onLeaveBack: () => video.pause(),
+    });
+
+    /*
+      Chegada direta pelo link do menu (#para-pais) pula a rolagem que
+      dispararia os gatilhos acima, e o vídeo ficaria parado justamente para
+      quem foi direto à seção. Aqui o estado inicial é conferido à mão.
+    */
+    if (playback.isActive) {
+      download();
+      play();
+    }
+
+    // Aba em segundo plano: o navegador reduz o ritmo por conta própria,
+    // mas não solta o decodificador. Pausar solta.
+    const onVisibility = () => {
+      if (document.hidden) video.pause();
+      else if (playback.isActive) play();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      warmup.kill();
+      playback.kill();
+      video.pause();
+    };
+  }, [ref]);
 
   useLayoutEffect(() => {
     const section = ref.current;
@@ -81,6 +184,43 @@ export function Parents() {
       aria-labelledby="pais-titulo"
       className="section-y surface-blush relative overflow-hidden"
     >
+      {/*
+        Cenário da seção.
+
+        Entra em `-z-10`, atrás do conteúdo e à frente do `surface-blush`
+        da própria seção — que continua no lugar como rede de segurança:
+        é ele quem aparece enquanto o vídeo não baixou (o `preload` começa
+        em `none`), se a rede falhar, ou se o navegador recusar o autoplay.
+        Em qualquer um desses casos a seção volta a ser exatamente o que
+        era antes, sem buraco nem retângulo preto.
+      */}
+      <div aria-hidden="true" className="absolute inset-0 -z-10">
+        <video
+          data-parental-video
+          src={parentalVideo}
+          muted
+          loop
+          playsInline
+          preload="none"
+          /*
+            O quadro é 16:9 e a âncora resolve o recorte que o `cover`
+            produz. No desktop a seção tem proporção parecida com a do
+            vídeo, então quase não há corte e o centro serve.
+
+            No celular a seção é bem mais alta que larga: o `cover` escala
+            pela altura — que passa a caber inteira, e por isso o segundo
+            valor não muda nada aqui — e descarta a maior parte da
+            horizontal, sobrando uma fatia estreita. 80% arrasta o quadro
+            para a esquerda até essa fatia cair sobre o cérebro, que é o que
+            se quer ver em movimento. Como ele ocupa a faixa do meio na
+            vertical, sobra fundo claro em cima e embaixo — o corte mostra a
+            silhueta, não uma mancha rosa preenchendo a tela.
+          */
+          className="size-full object-cover object-[80%_50%] lg:object-center"
+        />
+        <div className="parental-veil absolute inset-0" />
+      </div>
+
       <div className="container-page grid items-center gap-12 sm:gap-14 lg:grid-cols-2 lg:gap-16 xl:gap-20">
         <div className="lg:max-w-xl xl:max-w-2xl">
           <p data-reveal="fast" className="eyebrow mb-4 text-blush-600">
@@ -111,7 +251,14 @@ export function Parents() {
             <li
               key={benefit}
               data-parent-item
-              className="flex items-start gap-3.5 rounded-2xl border border-white/70 bg-white/70 p-4 backdrop-blur-sm transition-colors duration-300 hover:bg-white sm:gap-4 sm:p-5"
+              /*
+                Sem `backdrop-blur` desde que o fundo virou vídeo: o filtro
+                é recalculado a cada quadro que entra atrás dele, seis vezes
+                (um por card), com a seção presa na tela. Foi a mesma troca
+                feita nos cards da Formação. A opacidade sobe de 70 para 80
+                para compensar a perda do desfoque na legibilidade.
+              */
+              className="flex items-start gap-3.5 rounded-2xl border border-white/70 bg-white/80 p-4 transition-colors duration-300 hover:bg-white sm:gap-4 sm:p-5"
             >
               <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-blush-100 text-blush-600">
                 <Check className="size-3.5" aria-hidden="true" />

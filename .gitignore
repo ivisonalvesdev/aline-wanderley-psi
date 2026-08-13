@@ -8,7 +8,15 @@ dist
 # as versões .webp em assets/. Peso alto (4,8 MB) sem necessidade no repo.
 assets/originais-png/
 
-# Original do vídeo da seção Formação (7 MB, 720p). O site usa o resultado
-# de `npm run video` — assets/formacao.mp4, em 1080p e três vezes menor.
-# Ver scripts/build-formacao-video.mjs.
+# Originais dos vídeos de fundo. O site usa o resultado de `npm run video`
+# — assets/formacao.mp4 e assets/orientacao-parental.mp4, ambos em 1080p.
+# Ver scripts/build-videos.mjs.
 assets/video-origem/
+assets/video-orientacao-parental/
+
+# Export do protótipo das bolhas, vindo do Figma Make. Veio com a
+# biblioteca shadcn/ui inteira (~270 KB) e com os nomes dos arquivos
+# trocados — o efeito estava dentro de "alert-dialog.tsx". Já foi
+# portado para src/components/BubbleField.tsx; a pasta fica só como
+# referência local.
+efeito-bolhas/

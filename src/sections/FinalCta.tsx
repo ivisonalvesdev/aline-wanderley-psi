@@ -1,6 +1,7 @@
 import { FINAL_CTA } from "@/constants/content";
 import { SITE } from "@/constants/site";
 import { WhatsAppCta } from "@/components/WhatsAppCta";
+import { BubbleField } from "@/components/BubbleField";
 import { useReveal } from "@/hooks/useReveal";
 import { rich } from "@/utils/rich";
 
@@ -21,6 +22,18 @@ export function FinalCta() {
         data-parallax="0.1"
         className="absolute -top-24 left-1/2 -z-10 size-[340px] -translate-x-1/2 rounded-full bg-blush-100/80 blur-3xl sm:size-[560px]"
       />
+
+      {/*
+        Bolhas do fechamento.
+
+        Depois dos fundos e antes do conteúdo: todos estão em `-z-10`, então
+        quem decide a ordem de pintura é a posição no DOM — as bolhas
+        cobrem o degradê e passam por baixo do texto.
+
+        O `overflow-hidden` da seção é o que as mantém presas aqui: o campo
+        é `absolute inset-0`, e nenhuma bolha escapa para as seções acima.
+      */}
+      <BubbleField containerRef={ref} />
 
       <div className="container-page text-center">
         <p data-reveal="fast" className="eyebrow mb-5 text-blush-600">

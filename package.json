@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "video": "node scripts/build-formacao-video.mjs"
+    "video": "node scripts/build-videos.mjs"
   },
   "dependencies": {
     "@fontsource-variable/montserrat": "^5.3.0",
