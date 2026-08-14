@@ -356,8 +356,26 @@ export function Education() {
           // para o gesto não trazer os cartões de imediato.
           .to({}, { duration: 0.2 })
           .to(items, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.07 })
-          .to(cards, { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.1 }, "-=0.3")
-          .to(dim, { opacity: 0.46, duration: 0.5 }, "-=0.45");
+          /*
+            O escurecimento larga um fio à frente do texto.
+
+            Ele é o que dá contraste de leitura, então precisa já estar
+            chegando quando a primeira letra acende — no mesmo instante
+            ele ainda lia como atrasado, porque a opacidade leva um tempo
+            para virar sombra perceptível enquanto o texto acende de uma
+            vez. O `<-=0.1` compensa essa diferença de percepção: no
+            relógio a sombra sai antes, na tela os dois aparecem juntos.
+
+            A duração também encolheu (era 0.7): rampa mais curta chega ao
+            valor final junto com o texto, em vez de ainda estar subindo
+            quando ele já está inteiro em cena.
+
+            Como agora o véu do celular é leve (ver `formacao-veil` no
+            CSS), é este dim que responde sozinho pelo contraste; antes
+            ele apenas somava a um véu que já era pesado.
+          */
+          .to(dim, { opacity: 0.55, duration: 0.5 }, "<-=0.1")
+          .to(cards, { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.1 }, "-=0.4");
 
         // O vídeo acompanha a presença da seção em tela, e não o pin: ele
         // já está rodando quando a seção trava, e continua enquanto ela
@@ -417,7 +435,23 @@ export function Education() {
         ela, o vazio aparece como retângulo preto no meio de uma página
         clara.
       */}
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[rgb(78_30_45)]">
+      {/*
+        No celular o fundo abaixo da faixa de vídeo não é a ameixa cheia.
+
+        Ela encostava logo abaixo do notebook, e o contraste ali ficava
+        duro justamente no ponto em que a cena termina. O degradê entra
+        com um tom mais claro na altura da faixa e só fecha na ameixa
+        original mais abaixo — a massa escura desce, e a passagem do
+        vídeo para o fundo deixa de disputar com a mesa.
+
+        A cor chapada continua como base: é ela que cobre o intervalo
+        entre o layout e o primeiro quadro decodificado, e no desktop,
+        onde o vídeo ocupa tudo, é a única que aparece.
+      */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-[rgb(78_30_45)] max-sm:bg-[linear-gradient(to_bottom,rgb(102_46_64)_0%,rgb(102_46_64)_62%,rgb(90_37_54)_76%,rgb(78_30_45)_100%)]"
+      >
         <video
           data-formacao-video
           src={formacaoVideo}
@@ -435,11 +469,17 @@ export function Education() {
             ancoragem que resolvesse: o problema é de proporção, não de
             enquadramento.
 
-            Limitar a altura inverte a conta. Numa faixa de ~44svh o
+            Limitar a altura inverte a conta. Numa faixa de ~54svh o
             `cover` amplia bem menos e a janela visível passa a caber a
             cena inteira: rosto, mãos, notebook e mesa. Abaixo da faixa
             aparece a cor de fundo do wrapper, e a máscara logo abaixo
             dissolve a borda para que a passagem não leia como corte.
+
+            A altura é o ponto de equilíbrio da seção: encolhendo, sobra
+            faixa escura demais embaixo; crescendo, volta-se ao close que
+            se queria corrigir. O degradê da máscara ocupa os últimos 14%
+            da faixa — o suficiente para desmanchar a borda sem comer
+            parte útil da cena.
 
             No eixo Y o 22% do desktop segue valendo: em notebook largo e
             baixo o corte é vertical, e a cabeça dela quase encosta no topo
@@ -447,7 +487,7 @@ export function Education() {
             celular não há sobra vertical, então o eixo Y é indiferente e
             só o X é ancorado, em 10%, que é onde a cena fica centrada.
           */
-          className="w-full object-cover object-[10%_50%] max-sm:h-[44svh] max-sm:[-webkit-mask-image:linear-gradient(to_bottom,#000_72%,transparent_100%)] max-sm:[mask-image:linear-gradient(to_bottom,#000_72%,transparent_100%)] sm:h-full sm:object-[32%_22%]"
+          className="w-full object-cover object-[10%_50%] max-sm:h-[62svh] max-sm:[-webkit-mask-image:linear-gradient(to_bottom,#000_91%,transparent_100%)] max-sm:[mask-image:linear-gradient(to_bottom,#000_91%,transparent_100%)] sm:h-full sm:object-[32%_22%]"
         />
 
         <div className="formacao-veil absolute inset-0" />

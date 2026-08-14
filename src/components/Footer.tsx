@@ -20,8 +20,13 @@ const BASE_SIGNATURE_REM = 6;
  * 1920px a assinatura chegava a ~230px de corpo e passava a dominar o
  * rodapé inteiro, competindo com o conteúdo em vez de assiná-lo. A partir
  * deste teto ela para de crescer e apenas centraliza.
+ *
+ * O teto pôde subir de 9,5 quando a assinatura virou camada em `-z-10`:
+ * ela passa por trás das colunas em vez de disputar espaço com elas, e o
+ * risco de "dominar o rodapé" deixou de existir — o que cresce agora
+ * corre atrás do conteúdo, não na frente.
  */
-const MAX_SIGNATURE_REM = 9.5;
+const MAX_SIGNATURE_REM = 13;
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -61,7 +66,9 @@ export function Footer() {
       // viria com o fator anterior e a assinatura encolheria a cada chamada.
       const natural = el.getBoundingClientRect().width;
       if (!natural) return;
-      const ratio = (box.clientWidth * 0.92) / natural;
+      // 0.96 da caixa, e não 0.92: sendo camada de fundo, a assinatura
+      // pode chegar mais perto das bordas sem encostar em nada legível.
+      const ratio = (box.clientWidth * 0.96) / natural;
       el.style.fontSize = `${Math.min(BASE_SIGNATURE_REM * ratio, MAX_SIGNATURE_REM)}rem`;
     };
 

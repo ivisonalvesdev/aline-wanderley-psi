@@ -649,6 +649,33 @@
     rgb(78 30 45 / 0.82) 100%
   );
 
+  /*
+    No celular o véu é bem mais leve do que no tablet acima.
+
+    Ali o vídeo é uma faixa e a coreografia começa com ela limpa — o
+    texto e os cartões entram depois, e é o `data-formacao-dim` que traz
+    a sombra junto com eles (ver `Education.tsx`). Manter aqui o véu
+    pesado do tablet significava sombrear o rosto da Aline desde o
+    primeiro quadro, quando ainda não há texto nenhum para contrastar.
+
+    Sobra o suficiente para assentar a cena e nada além disso: o
+    contraste de leitura é responsabilidade do dim, que só chega quando
+    há o que ler.
+  */
+  @media (width < 40rem) {
+    background-image: linear-gradient(
+      180deg,
+      rgb(78 30 45 / 0.2) 0%,
+      rgb(78 30 45 / 0.16) 14%,
+      rgb(78 30 45 / 0.12) 28%,
+      rgb(78 30 45 / 0.12) 42%,
+      rgb(78 30 45 / 0.16) 56%,
+      rgb(78 30 45 / 0.22) 70%,
+      rgb(78 30 45 / 0.28) 85%,
+      rgb(78 30 45 / 0.32) 100%
+    );
+  }
+
   @media (width >= 64rem) {
     background-image: linear-gradient(
       90deg,
