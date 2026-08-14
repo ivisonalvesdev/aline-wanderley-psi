@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "@/utils/gsap";
 import { usePrefersReducedMotion } from "@/hooks/useMediaQuery";
 import { SITE } from "@/constants/site";
+import { SignatureText } from "@/components/SignatureText";
+import { typewriterTarget } from "@/utils/typewriter";
 import logoAline from "@assets/logo-maior.webp";
 
 interface PreloaderProps {
@@ -48,9 +50,14 @@ export function Preloader({ onComplete }: PreloaderProps) {
 
     const startedAt = performance.now();
     const pieces = root.querySelectorAll<HTMLElement>("[data-preloader-fade]");
+    const signature = root.querySelector<HTMLElement>("[data-signature]");
     const progress = { value: 0 };
     const tweens: gsap.core.Tween[] = [];
     const timers: number[] = [];
+
+    // Fecha já, antes da entrada: sem isto o nome apareceria inteiro por
+    // um quadro, antes de "digitar".
+    if (signature) gsap.set(signature, { width: 0 });
 
     /* As promessas abaixo continuam vivas depois de um cleanup — e no
        StrictMode do desenvolvimento o efeito monta, desmonta e monta de
@@ -71,6 +78,18 @@ export function Preloader({ onComplete }: PreloaderProps) {
       { autoAlpha: 0, y: 16 },
       { autoAlpha: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.1 },
     );
+
+    /*
+      O nome "digita" logo depois de aparecer — não junto, porque o
+      `fromTo` acima ainda está subindo e desfocando o traço fino da
+      assinatura no mesmo instante em que ele tentaria ser lido letra a
+      letra. `"<0.2"` começa 0,2s depois do início do fade, quando o nome
+      já está bem mais visível.
+    */
+    if (signature) {
+      const { width, ease } = typewriterTarget(signature, SITE.name.length);
+      intro.fromTo(signature, { width: 0 }, { width, ease, duration: 0.7 }, "<0.2");
+    }
 
     /* Avanço otimista. Desacelera de propósito perto do fim: o salto para
        100 tem que vir do carregamento real, não do relógio. */
@@ -186,13 +205,14 @@ export function Preloader({ onComplete }: PreloaderProps) {
       />
 
       <div className="relative flex flex-col items-center gap-3">
-        {/* A Halimun é a assinatura da identidade — o lugar certo para
-            ela é este: uma aparição só, em corpo grande, antes do site. */}
+        {/* A assinatura é a identidade da marca — o lugar certo para ela é
+            este: uma aparição só, em corpo grande, antes do site, digitada
+            como se estivesse sendo assinada na hora. */}
         <p
           data-preloader-fade
           className="font-signature text-5xl leading-none text-blush-500 opacity-0 sm:text-6xl"
         >
-          {SITE.name}
+          <SignatureText data-signature />
         </p>
         <p data-preloader-fade className="eyebrow text-ink-500 opacity-0">
           {SITE.role} · {SITE.crp}

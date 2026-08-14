@@ -8,7 +8,7 @@ export const SITE = {
   city: "Recife",
   region: "PE",
   neighborhood: "Boa Viagem",
-  /** Endereço do consultório — falta o número/sala para o SEO local ficar completo. */
+  /** Endereço do consultório. Sem número/sala por decisão da Aline, por segurança. */
   street: "Avenida Engenheiro Domingos Ferreira",
   postalCode: "51020-040",
   /* TODO: substituir pelo domínio definitivo */

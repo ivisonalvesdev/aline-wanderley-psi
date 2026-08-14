@@ -5,7 +5,9 @@ import { NAV_LINKS, SITE, WHATSAPP_URL, FULL_ADDRESS, MAP_LINK_URL } from "@/con
 import { CTA_LABEL_SHORT } from "@/constants/content";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { InstagramIcon } from "@/components/icons/InstagramIcon";
-import { gsap, ScrollTrigger, MOTION_OK } from "@/utils/gsap";
+import { gsap, MOTION_OK } from "@/utils/gsap";
+import { SignatureText } from "@/components/SignatureText";
+import { typewriterTarget } from "@/utils/typewriter";
 import logoAline from "@assets/logo-maior.webp";
 
 /** Corpo de referência da assinatura, só para medir — ver `fit`. */
@@ -29,6 +31,9 @@ export function Footer() {
   const closePrivacy = useCallback(() => setPrivacyOpen(false), []);
   const footerRef = useRef<HTMLElement>(null);
   const signatureBoxRef = useRef<HTMLDivElement>(null);
+  /** A caixa que recorta a largura para o efeito de "digitação". */
+  const signatureClipRef = useRef<HTMLSpanElement>(null);
+  /** O texto em si, cujo `font-size` é ajustado por `fit`. */
   const signatureRef = useRef<HTMLSpanElement>(null);
 
   /**
@@ -40,13 +45,9 @@ export function Footer() {
    * de referência, medido, e o corpo final sai da razão entre a largura
    * que ocupou e a que deveria ocupar.
    *
-   * O ajuste é no `font-size`, e não num `transform: scale`, porque a
-   * assinatura agora ocupa uma faixa própria no fluxo: um elemento
-   * escalado continua reservando a altura do tamanho original, e sobraria
-   * exatamente o vão vazio que havia embaixo do rodapé.
-   *
-   * O reajuste em `fonts.ready` é obrigatório: até a Halimun chegar, a
-   * medida é a da fonte de fallback, que tem outra largura por completo.
+   * O reajuste em `fonts.ready` é obrigatório: até a fonte de assinatura
+   * chegar, a medida é a da fonte de fallback, que tem outra largura por
+   * completo.
    */
   useLayoutEffect(() => {
     const el = signatureRef.current;
@@ -73,7 +74,7 @@ export function Footer() {
   }, []);
 
   /**
-   * A marca d'água é escrita quando o rodapé chega.
+   * A marca d'água é digitada quando o rodapé chega.
    *
    * Diferente da assinatura da seção Sobre, esta não é percorrida pela
    * rolagem: aqui é o fim da página, não há mais percurso para gastar — se
@@ -81,47 +82,60 @@ export function Footer() {
    * que é exatamente onde todo mundo para. Então ela roda no próprio
    * tempo, devagar, e só depois de o rodapé estar de fato em cena.
    *
-   * O traço é o mesmo `clip-path` da seção Sobre, mas sem `SplitText`: o
-   * texto é uma linha só e não há o que dividir.
+   * A largura só pode ser medida depois de `fit` já ter rodado com a fonte
+   * final (senão o alvo da animação sai do tamanho errado, da fonte de
+   * fallback) — por isso espera o mesmo `document.fonts.ready` que `fit`
+   * usa. Os dois `useLayoutEffect` do componente rodam em ordem de
+   * declaração, então o `.then(fit)` do efeito acima sempre é registrado,
+   * e portanto resolvido, antes do `.then` daqui.
    */
   useLayoutEffect(() => {
-    const el = signatureRef.current;
-    if (!el) return;
+    const clip = signatureClipRef.current;
+    if (!clip) return;
 
     const mm = gsap.matchMedia();
 
     mm.add(MOTION_OK, () => {
-      /*
-        As folgas verticais negativas são obrigatórias.
+      gsap.set(clip, { width: 0 });
 
-        `inset(0 …)` recorta exatamente na caixa do elemento, e a Halimun
-        transborda a sua: com entrelinha apertada, as hastes altas do "A" e
-        do "W" e as caudas descendentes ficam fora da caixa. O recorte as
-        decepava — era o corte reto que aparecia no topo do nome. Só o eixo
-        horizontal deve ser recortado, porque é ele que faz o traço.
-      */
-      gsap.set(el, { clipPath: "inset(-35% 100% -35% 0)" });
+      let cancelled = false;
+      let tween: gsap.core.Tween | undefined;
 
-      const stroke = gsap.timeline({ paused: true }).to(el, {
-        clipPath: "inset(-35% 0% -35% 0)",
-        // Bem mais lenta que a da seção Sobre: é o último gesto da página,
-        // e quem chegou aqui não está mais com pressa de avançar.
-        duration: 3.4,
-        ease: "power1.inOut",
-      });
+      document.fonts.ready.then(() => {
+        if (cancelled || !clip.isConnected) return;
 
-      const trigger = ScrollTrigger.create({
-        trigger: footerRef.current,
-        // O rodapé é alto; `top 70%` deixa a assinatura já dentro da tela
-        // quando o traço começa, em vez de correr fora de quadro.
-        start: "top 70%",
-        once: true,
-        onEnter: () => stroke.play(),
+        const { width, ease } = typewriterTarget(clip, SITE.name.length);
+
+        tween = gsap.fromTo(
+          clip,
+          { width: 0 },
+          {
+            width,
+            ease,
+            // Bem mais lenta que a da seção Sobre: é o último gesto da
+            // página, e quem chegou aqui não está mais com pressa de avançar.
+            duration: 3.4,
+            // Devolve a largura livre ao terminar — sem isto, um resize
+            // depois da digitação (fonte reajustada por `fit`) deixaria a
+            // caixa presa no valor antigo, cortando ou sobrando espaço.
+            onComplete: () => {
+              clip.style.width = "auto";
+            },
+            scrollTrigger: {
+              trigger: footerRef.current,
+              // O rodapé é alto; `top 70%` deixa a assinatura já dentro da
+              // tela quando a digitação começa, em vez de correr fora de
+              // quadro.
+              start: "top 70%",
+              once: true,
+            },
+          },
+        );
       });
 
       return () => {
-        trigger.kill();
-        stroke.kill();
+        cancelled = true;
+        tween?.kill();
       };
     });
 
@@ -249,37 +263,38 @@ export function Footer() {
         </div>
 
         {/*
-          Assinatura em marca d'água.
+          Faixa reservada para a assinatura em marca d'água.
 
-          Ocupa uma faixa própria entre as colunas e o filete do
-          copyright, e não uma camada solta no fundo. Como camada
-          absoluta ela cruzava o texto das colunas — o traço da Halimun é
-          alto e largo, e não havia posição em que coubesse sem encostar
-          em alguma coisa. Numa faixa própria o espaço é reservado, e nada
-          mais se sobrepõe.
-
-          Decorativa: o nome já é lido, com todas as letras, na linha de
-          copyright logo abaixo.
+          A altura é fixa e pequena de propósito — bem menor que a caixa
+          natural da fonte de assinatura no tamanho máximo. Isso só é
+          seguro porque a assinatura em si é uma camada `absolute` com
+          `-z-10` (abaixo): o que sobra do traço além desta faixa
+          simplesmente continua atrás das colunas, em vez de empurrá-las.
+          Sem o z-index próprio, a caixa precisaria ser alta o bastante
+          para conter a fonte inteira, que era o "espaço gigante" no
+          rodapé em telas largas.
         */}
-        <div
-          ref={signatureBoxRef}
-          aria-hidden="true"
-          className="pointer-events-none mt-6 flex justify-center select-none sm:mt-8"
-        >
-          {/* Entrelinha folgada porque numa fonte manuscrita as hastes e as
-              caudas passam bem do corpo: com a entrelinha apertada de
-              antes, a faixa media menos que o desenho e o nome encostava no
-              texto acima e no filete abaixo. */}
-          <span
-            ref={signatureRef}
-            className="inline-block font-signature leading-[1.22] whitespace-nowrap text-blush-400/35"
-            style={{ fontSize: `${BASE_SIGNATURE_REM}rem` }}
+        <div className="relative h-14 sm:h-20 lg:h-28">
+          <div
+            ref={signatureBoxRef}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 -bottom-1 -z-10 flex justify-center select-none"
           >
-            {SITE.name}
-          </span>
+            {/* A caixa de fora recorta a largura para o efeito de
+                digitação; a de dentro (`signatureRef`) é quem tem o
+                `font-size` ajustado por `fit`, medida por dentro do
+                recorte. */}
+            <span ref={signatureClipRef} className="inline-block overflow-hidden align-bottom whitespace-nowrap">
+              <SignatureText
+                ref={signatureRef}
+                className="font-signature leading-[1.22] text-blush-400/35"
+                style={{ fontSize: `${BASE_SIGNATURE_REM}rem` }}
+              />
+            </span>
+          </div>
         </div>
 
-        <div className="border-soft-t relative mt-6 flex flex-col items-start justify-between gap-3 pt-5 font-alt text-xs tracking-[0.01em] text-ink-500 sm:flex-row sm:items-center">
+        <div className="border-soft-t relative flex flex-col items-start justify-between gap-3 pt-5 font-alt text-xs tracking-[0.01em] text-ink-500 sm:flex-row sm:items-center">
           <p>
             © {year} {SITE.name} — {SITE.role}. Todos os direitos reservados.
           </p>

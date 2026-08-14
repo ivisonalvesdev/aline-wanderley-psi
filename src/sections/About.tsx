@@ -3,7 +3,7 @@ import { ABOUT } from "@/constants/content";
 import { SITE } from "@/constants/site";
 import { useReveal } from "@/hooks/useReveal";
 import { useMagnetic } from "@/hooks/useMagnetic";
-import { gsap, ScrollTrigger, SplitText, MOTION_OK, SCRUB } from "@/utils/gsap";
+import { gsap, MOTION_OK, SCRUB } from "@/utils/gsap";
 import { rich } from "@/utils/rich";
 import { cn } from "@/utils/cn";
 import aboutImage from "@assets/aline-sobre.webp";
@@ -189,23 +189,17 @@ export function About() {
     });
 
     /**
-     * Traço de escrita nos textos.
+     * Traço de escrita da assinatura.
      *
-     * Cada linha é revelada da esquerda para a direita por um `clip-path`
-     * que abre, como tinta saindo da caneta. É a leitura de "escrevendo"
-     * que funciona com fonte de texto: uma máquina de escrever, letra a
-     * letra, atrasaria a leitura de três parágrafos, e o traço real de
-     * caligrafia exigiria SVG com contorno — nenhum dos dois se aplica a
-     * texto corrido que precisa ser lido.
+     * É a única linha da seção em que o traço da esquerda para a direita é
+     * literal: a assinatura sendo feita, revelada por um `clip-path` que
+     * abre como tinta saindo da caneta. Os parágrafos ao lado entram com o
+     * fade padrão do site (`data-reveal`) — texto corrido precisa ser
+     * lido, e qualquer revelação linha a linha atrasa essa leitura.
      *
-     * A escrita roda no **próprio tempo**, disparada uma vez ao entrar na
-     * tela — deliberadamente sem `scrub`. Amarrada à rolagem, a mão que
-     * escrevia era a da pessoa: parava quando ela parava e voltava atrás
-     * quando ela subia, que é justamente o que desfazia a ilusão.
-     *
-     * O `SplitText` só corta as linhas depois de `fonts.ready`: enquanto a
-     * Poppins não chegou, o texto está na fonte de fallback, com métrica
-     * diferente, e as quebras medidas ali seriam as erradas.
+     * A medida espera `fonts.ready`: enquanto a fonte de assinatura não
+     * chega, o texto está na de fallback, com métrica diferente, e o
+     * recorte sairia na largura errada.
      */
     mm.add(
       {
@@ -220,77 +214,30 @@ export function About() {
         const section = ref.current;
         if (!section) return;
 
-        const texts = section.querySelectorAll<HTMLElement>("[data-handwrite]");
         const signature = section.querySelector<HTMLElement>("[data-handwrite-signature]");
-        const closed = [...texts, ...(signature ? [signature] : [])];
-
-        const splits: SplitText[] = [];
-        const triggers: ScrollTrigger[] = [];
-
-        /* Fecha tudo já, antes de qualquer medida: sem isto o texto
-           apareceria escrito durante a espera pelas fontes e só então
-           sumiria para ser escrito de novo. */
-        gsap.set(closed, { clipPath: "inset(-30% 100% -30% 0)" });
-
-        /** Corta o elemento em linhas e devolve os alvos da animação. */
-        const linesOf = (el: HTMLElement) => {
-          const split = SplitText.create(el, { type: "lines" });
-          splits.push(split);
-          return split.lines;
-        };
+        if (!signature) return;
 
         /*
           As folgas verticais negativas evitam que o recorte decepe o que
-          passa da caixa da linha: acentos no topo, caudas de "g" e "p"
-          embaixo e, na assinatura, as hastes altas da Halimun. Só o eixo
-          horizontal é recortado — é ele que desenha o traço.
+          passa da caixa da linha: na assinatura, as hastes altas e as
+          caudas descendentes ficam bem fora dela. Só o eixo horizontal é
+          recortado — é ele que desenha o traço.
         */
         const CLOSED = { clipPath: "inset(-30% 100% -30% 0)" };
         const OPEN = { clipPath: "inset(-30% 0% -30% 0)" };
 
-        const write = () => {
-          /*
-            O corpo do texto é escrito pela rolagem.
+        /* Fecha já, antes de qualquer medida: sem isto a assinatura
+           apareceria escrita durante a espera pelas fontes e só então
+           sumiria para ser escrita de novo. */
+        gsap.set(signature, CLOSED);
 
-            A caneta anda enquanto a pessoa desce e recua se ela sobe —
-            comportamento do `useReveal` do resto do site, e o que mantém
-            a seção coerente com as demais.
-          */
-          for (const el of texts) {
-            gsap.fromTo(linesOf(el), CLOSED, {
-              ...OPEN,
-              ease: "none",
-              /*
-                `stagger` maior que `duration` é o que faz a escrita ser
-                lida como linha a linha: cada linha termina antes de a
-                seguinte começar. Com os dois próximos elas se sobrepõem e
-                o bloco parece surgir de uma vez, que era o efeito
-                anterior.
-              */
-              duration: 0.6,
-              stagger: 0.85,
-              /*
-                A janela começa assim que o bloco aparece e fecha bem antes
-                de ele chegar ao meio da tela.
+        let tween: gsap.core.Tween | undefined;
 
-                Terminava em 40%, e o bloco de texto é alto: as últimas
-                linhas só completavam quando o parágrafo já estava subindo,
-                e num percurso curto — a seção trava logo adiante para a
-                troca do retrato — a escrita ficava pela metade. Fechar em
-                62% dá à última linha a mesma folga que a primeira tem.
-              */
-              scrollTrigger: {
-                trigger: el,
-                start: "top 95%",
-                end: "top 62%",
-                scrub: SCRUB,
-              },
-            });
-          }
+        document.fonts.ready.then(() => {
+          if (!section.isConnected) return;
 
           /*
-            A assinatura também é preenchida pela rolagem, como o corpo do
-            texto — a diferença é onde ela começa.
+            A assinatura é preenchida pela rolagem, como era antes.
 
             Lado a lado, o percurso é o da própria seção presa: a mão
             assina no mesmo trecho em que o retrato troca. Empilhado, esse
@@ -298,45 +245,34 @@ export function About() {
             subiu para fora da tela; ali ela volta a ser percorrida pela
             própria entrada em cena.
           */
-          if (signature) {
-            gsap.fromTo(linesOf(signature), CLOSED, {
-              ...OPEN,
-              ease: "none",
-              scrollTrigger: sideBySide
-                ? {
-                    trigger: section,
-                    start: swapStart,
-                    /*
-                      Menos da metade do trecho preso: a seção fica travada
-                      por ~0,9 tela, e gastar tudo isso na assinatura a
-                      deixaria terminando junto com a liberação do pin. Em
-                      0,4 ela fecha com o retrato ainda trocando.
-                    */
-                    end: () => `+=${window.innerHeight * 0.4}`,
-                    scrub: SCRUB,
-                  }
-                : {
-                    trigger: signature,
-                    start: "top 92%",
-                    end: "top 66%",
-                    scrub: SCRUB,
-                  },
-            });
-          }
-
-          /* Só agora os pais são liberados: as linhas já nasceram fechadas
-             pelos `fromTo` acima, então a troca acontece sem um quadro
-             exposto. */
-          gsap.set(closed, { clipPath: "none" });
-        };
-
-        document.fonts.ready.then(() => {
-          if (section.isConnected) write();
+          tween = gsap.fromTo(signature, CLOSED, {
+            ...OPEN,
+            ease: "none",
+            scrollTrigger: sideBySide
+              ? {
+                  trigger: section,
+                  start: swapStart,
+                  /*
+                    Menos da metade do trecho preso: a seção fica travada
+                    por ~0,9 tela, e gastar tudo isso na assinatura a
+                    deixaria terminando junto com a liberação do pin. Em
+                    0,4 ela fecha com o retrato ainda trocando.
+                  */
+                  end: () => `+=${window.innerHeight * 0.4}`,
+                  scrub: SCRUB,
+                }
+              : {
+                  trigger: signature,
+                  start: "top 92%",
+                  end: "top 66%",
+                  scrub: SCRUB,
+                },
+          });
         });
 
         return () => {
-          for (const trigger of triggers) trigger.kill();
-          for (const split of splits) split.revert();
+          tween?.scrollTrigger?.kill();
+          tween?.kill();
         };
       },
     );
@@ -426,7 +362,7 @@ export function About() {
             {ABOUT.paragraphs.map((paragraph) => (
               <p
                 key={paragraph.slice(0, 24)}
-                data-handwrite
+                data-reveal
                 className="leading-[1.75] text-ink-700 [--rich-weight:500]"
               >
                 {rich(paragraph)}
@@ -434,11 +370,10 @@ export function About() {
             ))}
           </div>
 
-          {/* Assinatura — uso previsto para a Halimun no manual da marca.
-              É a única linha em que o traço da esquerda para a direita é
-              literal: a assinatura sendo feita. Atributo próprio porque
-              ela não dispara ao entrar na tela como os demais textos, e
-              sim quando o retrato ao lado começa a trocar. */}
+          {/* Assinatura — a única linha em que o traço da esquerda para a
+              direita é literal: a assinatura sendo feita. Atributo próprio
+              porque ela não dispara ao entrar na tela como os demais
+              textos, e sim quando o retrato ao lado começa a trocar. */}
           <p
             data-handwrite-signature
             aria-hidden="true"
