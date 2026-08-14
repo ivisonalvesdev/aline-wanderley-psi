@@ -46,7 +46,7 @@ const PIN_SCROLL = "+=70%";
  * cansaço — passar muito de uma tela e meia faria a seção parecer que
  * não termina, que era o defeito da primeira versão desta seção.
  */
-const MOBILE_PIN = "+=125%";
+const MOBILE_PIN = "+=175%";
 
 type Certificate = (typeof EDUCATION.certificates)[number];
 
@@ -405,7 +405,8 @@ export function Education() {
           depois de ter lido o anterior — sem ela os dois chegariam
           juntos e a sobreposição não seria percebida como troca. `0.75`
           é o meio-termo: dá tempo de ler a legenda do que está em cena
-          sem transformar a seção em espera.
+          sem transformar a seção em espera. `0.75` era curto: o segundo
+          documento chegava antes de a leitura do primeiro terminar.
 
           O que sai de cena não some: recua um degrau e continua
           assomando por trás, para que o conjunto leia como uma pilha de
@@ -414,7 +415,7 @@ export function Education() {
         deck.slice(1).forEach((card, index) => {
           const below = deck.slice(0, index + 1);
           entrance
-            .to({}, { duration: 0.75 })
+            .to({}, { duration: 1.6 })
             .to(below, { scale: 0.95, y: -12, duration: 0.5 }, "<")
             .to(card, { autoAlpha: 1, y: 0, duration: 0.5 }, "<");
         });
