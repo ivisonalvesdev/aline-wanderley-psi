@@ -425,20 +425,29 @@ export function Education() {
           playsInline
           preload="metadata"
           /*
-            A ancoragem resolve os dois recortes que o `cover` produz.
+            No celular o vídeo é uma faixa, não um fundo de tela cheia.
 
-            No eixo Y o valor é 22%, e não `center`: em notebook largo e
+            O arquivo é 16:9 e a tela do celular é quase o inverso disso.
+            Cobrindo a altura toda, o `cover` precisava ampliar o quadro a
+            ponto de sobrar só ~26% da largura — uma fatia vertical com o
+            rosto dela e mais nada. O notebook, as mãos e a mesa, que são o
+            que conta a cena, ficavam inteiramente fora. Não havia
+            ancoragem que resolvesse: o problema é de proporção, não de
+            enquadramento.
+
+            Limitar a altura inverte a conta. Numa faixa de ~44svh o
+            `cover` amplia bem menos e a janela visível passa a caber a
+            cena inteira: rosto, mãos, notebook e mesa. Abaixo da faixa
+            aparece a cor de fundo do wrapper, e a máscara logo abaixo
+            dissolve a borda para que a passagem não leia como corte.
+
+            No eixo Y o 22% do desktop segue valendo: em notebook largo e
             baixo o corte é vertical, e a cabeça dela quase encosta no topo
-            do vídeo — centralizar cortava justamente ali. Puxar a âncora
-            para cima devolve a folga acima da cabeça.
-
-            No eixo X o valor muda com a largura. No celular a tela é alta
-            e estreita, então o `cover` descarta quase toda a horizontal e
-            sobra uma fatia fina: 15% desliza essa fatia para o começo do
-            quadro, que é onde a Aline está digitando. Em telas largas
-            sobra bem mais imagem, e 32% equilibra melhor a cena.
+            do vídeo — centralizar cortava justamente ali. Na faixa do
+            celular não há sobra vertical, então o eixo Y é indiferente e
+            só o X é ancorado, em 10%, que é onde a cena fica centrada.
           */
-          className="size-full object-cover object-[15%_22%] sm:object-[32%_22%]"
+          className="w-full object-cover object-[10%_50%] max-sm:h-[44svh] max-sm:[-webkit-mask-image:linear-gradient(to_bottom,#000_72%,transparent_100%)] max-sm:[mask-image:linear-gradient(to_bottom,#000_72%,transparent_100%)] sm:h-full sm:object-[32%_22%]"
         />
 
         <div className="formacao-veil absolute inset-0" />
