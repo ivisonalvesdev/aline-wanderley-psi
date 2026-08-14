@@ -260,6 +260,17 @@ export function Education() {
        */
       const playVideo = () => {
         if (!video) return;
+        /*
+          O loop é reafirmado a cada retomada, e não só na montagem.
+
+          O `load()` do warmup mais abaixo reinicia o elemento, e há
+          navegadores que descartam a propriedade nesse caminho. O
+          arquivo tem 8s e o trecho preso do celular passou a durar bem
+          mais que isso — sem o loop garantido, a cena congelava no meio
+          da seção, o que aparecia como "o vídeo para quando o segundo
+          documento chega".
+        */
+        video.loop = true;
         // A promessa é rejeitada quando a política de autoplay barra — o
         // vídeo fica no primeiro quadro e o texto entra do mesmo jeito,
         // então não há o que tratar.
@@ -271,6 +282,18 @@ export function Education() {
       /** Só existe no desktop: adianta o play em relação ao pin. */
       let prime: ScrollTrigger | undefined;
       const cleanups: Array<() => void> = [];
+
+      /* Rede de segurança do loop: se por qualquer motivo o vídeo chegar
+         ao fim, recomeça. Cobre os casos em que a propriedade `loop`
+         sozinha não segurou. */
+      if (video) {
+        const restart = () => {
+          video.currentTime = 0;
+          void video.play().catch(() => {});
+        };
+        video.addEventListener("ended", restart);
+        cleanups.push(() => video.removeEventListener("ended", restart));
+      }
 
       if (pinned) {
         entrance = gsap.timeline({ paused: true, defaults: { ease: EASE } });
@@ -429,14 +452,23 @@ export function Education() {
         // O vídeo acompanha a presença da seção em tela, e não o pin: ele
         // já está rodando quando a seção trava, e continua enquanto ela
         // estiver visível.
+        /*
+          `onToggle` no lugar dos quatro retornos separados.
+
+          Com os quatro, um `onLeave` disparado por remedida durante o
+          trecho preso pausava o vídeo sem que nada o retomasse depois —
+          a seção continuava à vista e a cena, parada. Aqui o estado é
+          derivado de `isActive`: enquanto a seção estiver em quadro o
+          vídeo roda, e qualquer reativação o traz de volta sozinha.
+        */
         trigger = ScrollTrigger.create({
           trigger: root,
           start: "top bottom",
           end: "bottom top",
-          onEnter: playVideo,
-          onEnterBack: playVideo,
-          onLeave: () => video?.pause(),
-          onLeaveBack: () => video?.pause(),
+          onToggle: (self) => {
+            if (self.isActive) playVideo();
+            else video?.pause();
+          },
         });
       }
 
