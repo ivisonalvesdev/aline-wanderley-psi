@@ -46,7 +46,7 @@ const PIN_SCROLL = "+=70%";
  * cansaço — passar muito de uma tela e meia faria a seção parecer que
  * não termina, que era o defeito da primeira versão desta seção.
  */
-const MOBILE_PIN = "+=155%";
+const MOBILE_PIN = "+=125%";
 
 type Certificate = (typeof EDUCATION.certificates)[number];
 
@@ -445,7 +445,7 @@ export function Education() {
         deck.slice(1).forEach((card, index) => {
           const below = deck.slice(0, index + 1);
           entrance
-            .to({}, { duration: 1.2 })
+            .to({}, { duration: 0.65 })
             /*
               O de baixo recua e tomba um grau para o lado oposto: é o
               desalinho que denuncia que existe outro documento atrás,
