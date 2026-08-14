@@ -46,7 +46,7 @@ const PIN_SCROLL = "+=70%";
  * cansaço — passar muito de uma tela e meia faria a seção parecer que
  * não termina, que era o defeito da primeira versão desta seção.
  */
-const MOBILE_PIN = "+=175%";
+const MOBILE_PIN = "+=195%";
 
 type Certificate = (typeof EDUCATION.certificates)[number];
 
@@ -415,9 +415,15 @@ export function Education() {
         deck.slice(1).forEach((card, index) => {
           const below = deck.slice(0, index + 1);
           entrance
-            .to({}, { duration: 1.6 })
-            .to(below, { scale: 0.95, y: -12, duration: 0.5 }, "<")
-            .to(card, { autoAlpha: 1, y: 0, duration: 0.5 }, "<");
+            .to({}, { duration: 2.1 })
+            /*
+              O de baixo recua e tomba um grau para o lado oposto: é o
+              desalinho que denuncia que existe outro documento atrás,
+              em vez de os dois se sobreporem em bloco perfeito e o de
+              trás simplesmente sumir.
+            */
+            .to(below, { scale: 0.94, y: -14, rotate: -2.2, duration: 0.5 }, "<")
+            .to(card, { autoAlpha: 1, y: 0, rotate: 1.4, duration: 0.5 }, "<");
         });
 
         // O vídeo acompanha a presença da seção em tela, e não o pin: ele
