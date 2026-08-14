@@ -38,7 +38,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     // TODO: confirmar com a Aline como ela prefere tratar o valor.
     question: "Qual o valor da sessão? Consigo reembolso pelo plano?",
     answer:
-      "O valor é informado na primeira conversa, junto com a frequência sugerida para o seu caso — assim você decide com todas as informações em mãos. Ao final de cada sessão você recebe recibo com o número do CRP, aceito pela maioria dos planos de saúde para reembolso. Pode perguntar sem compromisso pelo WhatsApp.",
+      "O valor é informado na primeira conversa, junto com a frequência sugerida para o seu caso. Assim você decide com todas as informações em mãos. Ao final de cada sessão você recebe recibo com o número do CRP, aceito pela maioria dos planos de saúde para reembolso. Pode perguntar sem compromisso pelo WhatsApp.",
   },
   {
     question: "A terapia online funciona mesmo?",
@@ -63,6 +63,6 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     question: "Como agendar uma consulta?",
     answer:
-      "Basta clicar em qualquer botão de WhatsApp do site. Você será direcionado para uma conversa direta, onde poderá tirar dúvidas sobre horários, valores e modalidades de atendimento — sem compromisso.",
+      "Basta clicar em qualquer botão de WhatsApp do site. Você será direcionado para uma conversa direta, onde poderá tirar dúvidas sobre horários, valores e modalidades de atendimento, sem compromisso.",
   },
 ];

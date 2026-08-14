@@ -296,7 +296,7 @@ export function Footer() {
 
         <div className="border-soft-t relative flex flex-col items-start justify-between gap-3 pt-5 font-alt text-xs tracking-[0.01em] text-ink-500 sm:flex-row sm:items-center">
           <p>
-            © {year} {SITE.name} — {SITE.role}. Todos os direitos reservados.
+            © {year} {SITE.name}, {SITE.role}. Todos os direitos reservados.
           </p>
 
           <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">

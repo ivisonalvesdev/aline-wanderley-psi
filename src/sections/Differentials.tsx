@@ -96,7 +96,7 @@ export function Differentials() {
         <SectionHeading
           eyebrow="Por que a Aline"
           title="Um cuidado que une **técnica e afeto**"
-          description="Mais do que uma abordagem, um jeito de olhar para cada pessoa — com respeito, ciência e presença."
+          description="Mais do que uma abordagem, um jeito de olhar para cada pessoa, com respeito, ciência e presença."
         />
 
         <ul className="mt-12 grid gap-x-8 gap-y-9 sm:mt-14 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-10 lg:grid-cols-3 xl:gap-x-14">

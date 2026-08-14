@@ -28,7 +28,7 @@ export const HERO = {
   headline: "Por trás de cada **comportamento,** existe uma **emoção** precisando de **acolhimento.**",
   subheadline:
     "Psicoterapia fundamentada na **Terapia Cognitivo-Comportamental (TCC)**. Um espaço seguro e acolhedor em Recife e online para todo o Brasil.",
-  badges: ["CRP 02/25892", "Abordagem TCC", "Online — todo o Brasil", "Presencial — Recife"],
+  badges: ["CRP 02/25892", "Abordagem TCC", "Online para todo o Brasil", "Presencial em Recife"],
 } as const;
 
 /**
@@ -208,13 +208,13 @@ export const MODALITIES: Modality[] = [
  * O operacional que costuma travar a decisão de quem nunca fez terapia.
  * Deixar isso à vista evita que a dúvida vire desistência.
  *
- * TODO: confirmar duração e frequência com a Aline antes de publicar.
+ * Duração e frequência confirmadas com a Aline.
  */
 export const MODALITY_FACTS = [
   {
     icon: Clock,
     label: "Duração",
-    value: "Sessões de 50 minutos",
+    value: "Sessões de 40 a 50 minutos",
   },
   {
     icon: CalendarDays,
@@ -321,6 +321,6 @@ export const FINAL_CTA = {
   title:
     "O primeiro passo costuma ser o mais difícil. Ele também pode ser **o mais transformador.**",
   description:
-    "Se algo dentro de você — ou na vida de quem você ama está pedindo cuidado, estou aqui para acolher essa história. Vamos conversar?",
+    "Se algo dentro de você, ou na vida de quem você ama, está pedindo cuidado, estou aqui para acolher essa história. Vamos conversar?",
   buttonLabel: CTA_LABEL,
 } as const;

@@ -64,16 +64,16 @@ const CONTACT_CHANNELS = [
     value: SITE.email,
     href: `mailto:${SITE.email}`,
     /*
-      O endereço é do Gmail, e o vermelho é a cor primária da marca. Estava
-      no rosa da identidade — o único dos três que não vestia a própria cor,
-      justamente o oposto do que a linha acima diz.
-
-      O glifo continua sendo o envelope genérico do Lucide, e não o "M"
-      colorido do Gmail: o logotipo real só existe multicolorido sobre
-      branco, e um ladrilho branco no meio de dois saturados quebraria a
-      leitura da fileira.
+      Ficou o vermelho da marca do Gmail (#EA4335) por um tempo, seguindo a
+      mesma lógica do WhatsApp e do Instagram acima — mas ao lado dos dois
+      ele lia como saturado demais, destoando do restante pastel do
+      cartão. Aqui o e-mail é só um canal genérico (o glifo já é o
+      envelope do Lucide, não o "M" do Gmail), então volta a vestir a cor
+      da própria identidade: `blush-600`, e não o `blush-500` do resto do
+      site, porque é o tom que mantém contraste AA com o ícone branco por
+      cima (ver nota em `index.css`).
     */
-    tint: "bg-[#EA4335]",
+    tint: "bg-blush-600",
     external: false,
   },
 ] as const;
@@ -96,7 +96,7 @@ export function Modalities() {
         <SectionHeading
           eyebrow="Modalidades"
           title="**Presencial** no Recife ou **online,** no seu ritmo"
-          description="O mesmo cuidado, a mesma escuta — no formato que faz mais sentido para a sua rotina."
+          description="O mesmo cuidado, a mesma escuta, no formato que faz mais sentido para a sua rotina."
           className="[--rich-accent:var(--color-blush-500)]"
         />
 

@@ -23,7 +23,7 @@ export function Faq() {
         <SectionHeading
           eyebrow="Dúvidas frequentes"
           title="Tudo o que você precisa saber **antes de começar**"
-          description="Se a sua dúvida não estiver aqui, é só chamar no WhatsApp — respondo pessoalmente."
+          description="Se a sua dúvida não estiver aqui, é só chamar no WhatsApp. Respondo pessoalmente."
         />
 
         <div className="mx-auto mt-12 max-w-3xl space-y-3 sm:mt-14">

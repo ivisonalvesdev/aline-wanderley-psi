@@ -36,14 +36,14 @@ export interface PrivacySection {
 }
 
 export const PRIVACY_INTRO =
-  "Esta política explica quais dados pessoais são tratados quando você visita este site ou entra em contato, com que finalidade e quais são os seus direitos. Ela foi escrita em linguagem direta, e descreve exatamente o funcionamento deste site — não um modelo padrão.";
+  "Esta política explica quais dados pessoais são tratados quando você visita este site ou entra em contato, com que finalidade e quais são os seus direitos. Ela foi escrita em linguagem direta, e descreve exatamente o funcionamento deste site, não um modelo padrão.";
 
 export const PRIVACY_SECTIONS: PrivacySection[] = [
   {
     title: "Quem é responsável pelos seus dados",
     body: [
       `O tratamento é feito por **${SITE.name}**, ${SITE.role.toLowerCase()}, inscrita no ${SITE.crp}, com consultório em ${FULL_ADDRESS}.`,
-      `Para qualquer assunto relacionado a esta política — inclusive para exercer os direitos descritos abaixo —, o contato é **${SITE.email}**. Esse mesmo endereço responde pelo papel de encarregado de dados previsto no art. 41 da LGPD.`,
+      `Para qualquer assunto relacionado a esta política, inclusive para exercer os direitos descritos abaixo, o contato é **${SITE.email}**. Esse mesmo endereço responde pelo papel de encarregado de dados previsto no art. 41 da LGPD.`,
     ],
   },
   {
@@ -51,20 +51,20 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
     body: [
       "**Nada.** Navegar por estas páginas não gera cadastro, não cria conta e não deixa dados com a psicóloga.",
       "Em termos concretos, este site **não possui** formulários, campos de cadastro ou newsletter; **não utiliza** cookies próprios, `localStorage` ou qualquer armazenamento no seu navegador; e **não emprega** ferramentas de analytics, pixels de rastreamento ou gerenciadores de tag. As fontes tipográficas são servidas pelo próprio domínio, e não por serviços externos.",
-      "Como acontece com qualquer site, o servidor que hospeda estas páginas pode registrar dados técnicos de acesso — endereço IP, data e hora, navegador — em registros mantidos por prazo curto, com a finalidade de segurança e funcionamento, conforme obriga o Marco Civil da Internet (Lei 12.965/2014, art. 15).",
+      "Como acontece com qualquer site, o servidor que hospeda estas páginas pode registrar dados técnicos de acesso (endereço IP, data e hora, navegador) em registros mantidos por prazo curto, com a finalidade de segurança e funcionamento, conforme obriga o Marco Civil da Internet (Lei 12.965/2014, art. 15).",
     ],
   },
   {
     title: "O mapa do consultório",
     body: [
-      "A seção **Modalidades** exibe um mapa incorporado do Google Maps. Ao carregar, esse mapa comunica-se diretamente com servidores do Google, que pode receber seu endereço IP e utilizar cookies próprios — isso ocorre dentro do serviço do Google, fora do controle deste site.",
+      "A seção **Modalidades** exibe um mapa incorporado do Google Maps. Ao carregar, esse mapa comunica-se diretamente com servidores do Google, que pode receber seu endereço IP e utilizar cookies próprios. Isso ocorre dentro do serviço do Google, fora do controle deste site.",
       "É o único conteúdo de terceiros embutido nestas páginas. Se preferir evitá-lo, o endereço do consultório também está escrito por extenso, em texto, logo abaixo do mapa.",
     ],
   },
   {
     title: "Quando você entra em contato",
     body: [
-      "Os botões de WhatsApp, Instagram e e-mail levam você para fora deste site. A conversa passa a acontecer na plataforma escolhida, e cada uma tem a própria política de privacidade — WhatsApp e Instagram são operados pela Meta.",
+      "Os botões de WhatsApp, Instagram e e-mail levam você para fora deste site. A conversa passa a acontecer na plataforma escolhida, e cada uma tem a própria política de privacidade. WhatsApp e Instagram são operados pela Meta.",
       "A partir daí, os dados que você enviar (nome, telefone, e-mail e o que escrever na mensagem) são tratados para responder ao contato, avaliar a demanda e, se for o caso, agendar atendimento. A base legal é o interesse em atender ao seu próprio pedido (LGPD, art. 7º, V e IX).",
     ],
   },
@@ -81,7 +81,7 @@ export const PRIVACY_SECTIONS: PrivacySection[] = [
     title: "Crianças e adolescentes",
     body: [
       "Parte do atendimento é dirigida a crianças e adolescentes. Nesses casos, o tratamento de dados observa o art. 14 da LGPD: é realizado no **melhor interesse** do menor e depende do consentimento específico de ao menos um dos pais ou do responsável legal.",
-      "O adolescente é informado, em linguagem adequada à sua idade, sobre o que é registrado e sobre os limites do sigilo — inclusive sobre o que pode e o que não pode ser compartilhado com os responsáveis.",
+      "O adolescente é informado, em linguagem adequada à sua idade, sobre o que é registrado e sobre os limites do sigilo, inclusive sobre o que pode e o que não pode ser compartilhado com os responsáveis.",
       "Este site não é dirigido à coleta de dados de menores e, como descrito acima, não coleta dados de visitante algum.",
     ],
   },

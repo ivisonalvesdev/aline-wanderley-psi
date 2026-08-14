@@ -16,16 +16,18 @@
 @import "tailwindcss";
 
 /**
- * Herr Von Muellerhoff — fonte de assinatura da identidade.
+ * Dancing Script — fonte de assinatura da identidade.
  *
- * Alejandro Paul / Sudtipos, sob SIL Open Font License 1.1 (o texto da
- * licença acompanha o arquivo em `assets/fontes/OFL.txt`, como a própria
- * OFL exige). Uso comercial livre, inclusive embarcada via @font-face e
- * redistribuída junto do projeto.
+ * The Dancing Script Project Authors (Impallari Type), sob SIL Open Font
+ * License 1.1 (o texto da licença acompanha o arquivo em
+ * `assets/fontes/OFL.txt`, como a própria OFL exige). Uso comercial
+ * livre, inclusive embarcada via @font-face e redistribuída junto do
+ * projeto. Só o peso Regular (400) é usado — os demais pesos da família
+ * não chegaram a entrar no projeto.
  */
 @font-face {
-  font-family: "Herr Von Muellerhoff";
-  src: url("../../assets/fontes/HerrVonMuellerhoff-Regular.ttf") format("truetype");
+  font-family: "Dancing Script";
+  src: url("../../assets/fontes/DancingScript-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -40,7 +42,7 @@
   --font-sans: "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-alt: "Montserrat Variable", "Poppins", ui-sans-serif, system-ui, sans-serif;
-  --font-signature: "Herr Von Muellerhoff", "Segoe Script", cursive;
+  --font-signature: "Dancing Script", "Segoe Script", cursive;
 
   /* Breakpoint extra para monitores grandes (1920px+) */
   --breakpoint-3xl: 120rem;

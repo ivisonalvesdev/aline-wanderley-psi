@@ -253,18 +253,20 @@ export function About() {
                   trigger: section,
                   start: swapStart,
                   /*
-                    Menos da metade do trecho preso: a seção fica travada
-                    por ~0,9 tela, e gastar tudo isso na assinatura a
-                    deixaria terminando junto com a liberação do pin. Em
-                    0,4 ela fecha com o retrato ainda trocando.
+                    A seção fica travada por ~0,9 tela. 0,6 alonga o
+                    percurso da escrita a pedido da Aline — mais devagar
+                    que a versão anterior (0,4) — mantendo folga antes da
+                    liberação do pin, para não terminar junto com ela.
                   */
-                  end: () => `+=${window.innerHeight * 0.4}`,
+                  end: () => `+=${window.innerHeight * 0.6}`,
                   scrub: SCRUB,
                 }
               : {
                   trigger: signature,
                   start: "top 92%",
-                  end: "top 66%",
+                  // Janela mais larga que antes (era "top 66%") para a
+                  // escrita render mais devagar, a pedido da Aline.
+                  end: "top 58%",
                   scrub: SCRUB,
                 },
           });

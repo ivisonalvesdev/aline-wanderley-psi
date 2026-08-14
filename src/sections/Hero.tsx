@@ -201,7 +201,7 @@ export function Hero({ introReady }: HeroProps) {
           >
             <img
               src={logoAline}
-              alt="Aline Wanderley — Psicóloga"
+              alt="Aline Wanderley, Psicóloga"
               fetchPriority="high"
               className="absolute top-[-57.02%] left-[-25.14%] w-[142.86%] max-w-none"
             />

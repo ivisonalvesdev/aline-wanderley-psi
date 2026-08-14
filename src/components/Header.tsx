@@ -136,7 +136,7 @@ export function Header() {
           <div className="relative aspect-[175/114] w-20 overflow-hidden sm:w-24 short:w-20">
             <img
               src={logoAline}
-              alt="Aline Wanderley — Psicóloga"
+              alt="Aline Wanderley, Psicóloga"
               className="absolute top-[-57.02%] left-[-25.14%] w-[142.86%] max-w-none"
             />
           </div>

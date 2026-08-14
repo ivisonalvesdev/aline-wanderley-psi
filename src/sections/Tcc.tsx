@@ -88,7 +88,7 @@ export function Tcc() {
           eyebrow="A abordagem"
           width="wide"
           title={"**Terapia Cognitivo-Comportamental,**\nexplicada com calma"}
-          description="Uma abordagem estruturada, colaborativa e validada pela ciência — em que cada passo do processo faz sentido para quem o vive."
+          description="Uma abordagem estruturada, colaborativa e validada pela ciência, em que cada passo do processo faz sentido para quem o vive."
         />
 
         <ol className="mt-12 grid gap-5 sm:mt-14 sm:gap-6 md:grid-cols-3">
