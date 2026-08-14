@@ -36,16 +36,17 @@ const PIN_SCROLL = "+=70%";
 /**
  * Percurso do celular.
  *
- * Curto de propósito. Aqui a seção trava, mas quem move a coreografia é o
- * dedo: parado, a pessoa fica vendo o vídeo limpo pelo tempo que quiser;
- * deslizando, os cartões entram; seguindo em frente, a página é devolvida.
+ * Aqui a seção trava, mas quem move a coreografia é o dedo: parado, a
+ * pessoa fica vendo o vídeo limpo pelo tempo que quiser; deslizando, o
+ * texto e os documentos entram; seguindo em frente, a página é devolvida.
  *
- * A versão anterior contava segundos e prendia por uma tela e meia, o que
- * obrigava a rolar muito para sair da seção depois de já ter visto tudo.
- * 80% é o mínimo que ainda dá curso para os cartões entrarem sem parecer
- * que apareceram de um salto.
+ * O percurso cresceu de 80% quando os cartões passaram a se sobrepor um
+ * ao outro em vez de virem quase juntos: cada documento espera a sua vez
+ * de rolagem, e isso precisa de curso para acontecer. O teto é o
+ * cansaço — passar muito de uma tela e meia faria a seção parecer que
+ * não termina, que era o defeito da primeira versão desta seção.
  */
-const MOBILE_PIN = "+=80%";
+const MOBILE_PIN = "+=125%";
 
 type Certificate = (typeof EDUCATION.certificates)[number];
 
@@ -110,8 +111,14 @@ function CertificateCard({
     vazio no rodapé do cartão: é o diploma que cresce até empatar com o
     vizinho, que era o pedido.
   */
+  /*
+    `grid-area: 1/1` põe todos os cartões na mesma célula no celular, um
+    sobre o outro — quem os separa ali é o tempo da rolagem, não o
+    espaço (ver a coreografia sem pin em `Education`). A partir de `sm`
+    a grade volta a ter uma coluna por documento e a regra sai de cena.
+  */
   return (
-    <li data-formacao-card className="flex">
+    <li data-formacao-card className="flex max-sm:[grid-area:1/1]">
       <div ref={magnetRef} className="flex w-full">
         {certificate.pending || !image ? (
           <div className={cn(CARD_SURFACE, "flex w-full flex-col p-4")}>
@@ -351,6 +358,25 @@ export function Education() {
           },
         });
 
+        /*
+          No celular os cartões ocupam o mesmo lugar, um sobre o outro.
+
+          Empilhados em coluna eles pediam a altura de dois documentos, e
+          era essa altura que obrigava a faixa escura a descer até o fim
+          da tela. Sobrepostos, a seção precisa do espaço de um só: sobra
+          mais vídeo em cena e menos sombra embaixo dele.
+
+          A troca também dá o que fazer à rolagem no meio do trecho preso
+          — antes os dois entravam quase juntos e o resto do pin era
+          espera vazia.
+        */
+        const deck = [...cards];
+
+        /* Os de cima da pilha partem de mais baixo que o primeiro: é o
+           curso extra que faz a chegada ler como "deslizou por cima" e
+           não como "acendeu no lugar". */
+        gsap.set(deck.slice(1), { y: 64 });
+
         entrance
           // Respiro inicial: o primeiro toque de rolagem ainda é só vídeo,
           // para o gesto não trazer os cartões de imediato.
@@ -366,16 +392,32 @@ export function Education() {
             vez. O `<-=0.1` compensa essa diferença de percepção: no
             relógio a sombra sai antes, na tela os dois aparecem juntos.
 
-            A duração também encolheu (era 0.7): rampa mais curta chega ao
-            valor final junto com o texto, em vez de ainda estar subindo
-            quando ele já está inteiro em cena.
-
-            Como agora o véu do celular é leve (ver `formacao-veil` no
-            CSS), é este dim que responde sozinho pelo contraste; antes
-            ele apenas somava a um véu que já era pesado.
+            Como o véu do celular é leve (ver `formacao-veil` no CSS), é
+            este dim que responde sozinho pelo contraste de leitura.
           */
-          .to(dim, { opacity: 0.55, duration: 0.5 }, "<-=0.1")
-          .to(cards, { autoAlpha: 1, y: 0, duration: 0.6, stagger: 0.1 }, "-=0.4");
+          .to(dim, { opacity: 0.48, duration: 0.5 }, "<-=0.1")
+          .to(deck[0], { autoAlpha: 1, y: 0, duration: 0.5 }, "-=0.35");
+
+        /*
+          Cada documento seguinte espera a sua vez de rolagem.
+
+          A pausa antes de cada um é o que o usuário percorre com o dedo
+          depois de ter lido o anterior — sem ela os dois chegariam
+          juntos e a sobreposição não seria percebida como troca. `0.75`
+          é o meio-termo: dá tempo de ler a legenda do que está em cena
+          sem transformar a seção em espera.
+
+          O que sai de cena não some: recua um degrau e continua
+          assomando por trás, para que o conjunto leia como uma pilha de
+          documentos e não como um substituindo o outro.
+        */
+        deck.slice(1).forEach((card, index) => {
+          const below = deck.slice(0, index + 1);
+          entrance
+            .to({}, { duration: 0.75 })
+            .to(below, { scale: 0.95, y: -12, duration: 0.5 }, "<")
+            .to(card, { autoAlpha: 1, y: 0, duration: 0.5 }, "<");
+        });
 
         // O vídeo acompanha a presença da seção em tela, e não o pin: ele
         // já está rodando quando a seção trava, e continua enquanto ela
@@ -450,7 +492,7 @@ export function Education() {
       */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[rgb(78_30_45)] max-sm:bg-[linear-gradient(to_bottom,rgb(102_46_64)_0%,rgb(102_46_64)_62%,rgb(90_37_54)_76%,rgb(78_30_45)_100%)]"
+        className="absolute inset-0 -z-10 bg-[rgb(78_30_45)] max-sm:bg-[linear-gradient(to_bottom,rgb(158_106_124)_0%,rgb(150_98_117)_82%,rgb(132_80_100)_90%,rgb(112_60_80)_100%)]"
       >
         <video
           data-formacao-video
@@ -487,7 +529,7 @@ export function Education() {
             celular não há sobra vertical, então o eixo Y é indiferente e
             só o X é ancorado, em 10%, que é onde a cena fica centrada.
           */
-          className="w-full object-cover object-[10%_50%] max-sm:h-[62svh] max-sm:[-webkit-mask-image:linear-gradient(to_bottom,#000_91%,transparent_100%)] max-sm:[mask-image:linear-gradient(to_bottom,#000_91%,transparent_100%)] sm:h-full sm:object-[32%_22%]"
+          className="w-full object-cover object-[10%_50%] max-sm:h-[82svh] max-sm:[-webkit-mask-image:linear-gradient(to_bottom,#000_84%,rgb(0_0_0/0.55)_94%,transparent_100%)] max-sm:[mask-image:linear-gradient(to_bottom,#000_84%,rgb(0_0_0/0.55)_94%,transparent_100%)] sm:h-full sm:object-[32%_22%]"
         />
 
         <div className="formacao-veil absolute inset-0" />
