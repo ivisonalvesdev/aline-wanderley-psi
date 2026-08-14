@@ -14,13 +14,12 @@ assets/originais-png/
 assets/video-origem/
 assets/video-orientacao-parental/
 
-# Arquivos de fonte. A fonte de assinatura em uso é a versão DEMO da
-# Halimun, licenciada só para uso pessoal — redistribuir o .ttf num
-# repositório é, por si só, uma violação da licença, independente do
-# site. Fica só na máquina de quem desenvolve até a licença comercial
-# ser comprada (ou a fonte, trocada). Ver o comentário em
-# src/styles/index.css.
-assets/fontes/
+# Fontes sem licença comercial. A de assinatura em uso é a Herr Von
+# Muellerhoff (SIL OFL), que PODE ser versionada e por isso não entra
+# aqui. Estes são restos da Halimun, versão demo de uso pessoal: nunca
+# podem voltar ao repositório nem ao site. Ver src/styles/index.css.
+assets/fontes/Halimun.ttf
+assets/fontes/Readme.txt
 
 # Export do protótipo das bolhas, vindo do Figma Make. Veio com a
 # biblioteca shadcn/ui inteira (~270 KB) e com os nomes dos arquivos

@@ -16,21 +16,16 @@
 @import "tailwindcss";
 
 /**
- * Fonte de assinatura da identidade.
+ * Herr Von Muellerhoff — fonte de assinatura da identidade.
  *
- * ⚠️ EM AVALIAÇÃO PELA CLIENTE — a Halimun (Creatype Studio) está ativa
- * apenas para a apresentação. O arquivo é a versão DEMO, de uso pessoal:
- * NÃO pode ir ao ar num site comercial sem a licença comprada em
- * https://creatypestudio.co/halimun.
- *
- * Por isso `assets/fontes/` está no .gitignore: o arquivo fica só na
- * máquina, nunca no repositório. Se a cliente aprovar, compra-se a
- * licença; se não, a alternativa já testada é a Herr Von Muellerhoff
- * (SIL OFL, uso comercial livre) — trocar as duas linhas abaixo.
+ * Alejandro Paul / Sudtipos, sob SIL Open Font License 1.1 (o texto da
+ * licença acompanha o arquivo em `assets/fontes/OFL.txt`, como a própria
+ * OFL exige). Uso comercial livre, inclusive embarcada via @font-face e
+ * redistribuída junto do projeto.
  */
 @font-face {
-  font-family: "Halimun";
-  src: url("../../assets/fontes/Halimun.ttf") format("truetype");
+  font-family: "Herr Von Muellerhoff";
+  src: url("../../assets/fontes/HerrVonMuellerhoff-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -45,7 +40,7 @@
   --font-sans: "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-alt: "Montserrat Variable", "Poppins", ui-sans-serif, system-ui, sans-serif;
-  --font-signature: "Halimun", "Segoe Script", cursive;
+  --font-signature: "Herr Von Muellerhoff", "Segoe Script", cursive;
 
   /* Breakpoint extra para monitores grandes (1920px+) */
   --breakpoint-3xl: 120rem;
