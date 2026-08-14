@@ -83,12 +83,25 @@ export function Preloader({ onComplete }: PreloaderProps) {
       O nome "digita" logo depois de aparecer — não junto, porque o
       `fromTo` acima ainda está subindo e desfocando o traço fino da
       assinatura no mesmo instante em que ele tentaria ser lido letra a
-      letra. `"<0.2"` começa 0,2s depois do início do fade, quando o nome
-      já está bem mais visível.
+      letra.
+
+      A medida da largura espera `fonts.ready`, e por isso fica fora do
+      `intro`: em acesso frio, sem a fonte em cache, ela ainda não tinha
+      chegado quando este efeito rodava — a largura saía medida na fonte
+      de fallback (métrica bem diferente da Dancing Script), e quando a
+      fonte certa entrava por cima via `font-display: swap`, o texto não
+      preenchia mais a caixa que fora animada para o tamanho errado. Lia
+      como a assinatura "torta"/deslocada, só no primeiro carregamento —
+      exatamente porque só ali a fonte não estava em cache. Em recarregar
+      a fonte já chegava a tempo, e por isso o defeito sumia.
     */
+    let signatureTween: gsap.core.Tween | undefined;
     if (signature) {
-      const { width, ease } = typewriterTarget(signature, SITE.name.length);
-      intro.fromTo(signature, { width: 0 }, { width, ease, duration: 0.7 }, "<0.2");
+      document.fonts.ready.then(() => {
+        if (cancelled || !signature.isConnected) return;
+        const { width, ease } = typewriterTarget(signature, SITE.name.length);
+        signatureTween = gsap.fromTo(signature, { width: 0 }, { width, ease, duration: 0.7, delay: 0.2 });
+      });
     }
 
     /* Avanço otimista. Desacelera de propósito perto do fim: o salto para
@@ -167,6 +180,7 @@ export function Preloader({ onComplete }: PreloaderProps) {
     return () => {
       cancelled = true;
       intro.kill();
+      signatureTween?.kill();
       tweens.forEach((tween) => tween.kill());
       timers.forEach((timer) => window.clearTimeout(timer));
       delete document.body.dataset.loading;
