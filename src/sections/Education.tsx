@@ -46,7 +46,7 @@ const PIN_SCROLL = "+=70%";
  * cansaço — passar muito de uma tela e meia faria a seção parecer que
  * não termina, que era o defeito da primeira versão desta seção.
  */
-const MOBILE_PIN = "+=195%";
+const MOBILE_PIN = "+=155%";
 
 type Certificate = (typeof EDUCATION.certificates)[number];
 
@@ -425,11 +425,18 @@ export function Education() {
           Cada documento seguinte espera a sua vez de rolagem.
 
           A pausa antes de cada um é o que o usuário percorre com o dedo
-          depois de ter lido o anterior — sem ela os dois chegariam
-          juntos e a sobreposição não seria percebida como troca. `0.75`
-          é o meio-termo: dá tempo de ler a legenda do que está em cena
-          sem transformar a seção em espera. `0.75` era curto: o segundo
-          documento chegava antes de a leitura do primeiro terminar.
+          depois de ter lido o anterior: sem ela os dois chegariam juntos
+          e a sobreposição não seria percebida como troca.
+
+          ⚠️ A posição da entrada é o ponto sensível deste bloco. Ela
+          precisa cair **depois** do espaçador, e é por isso que não leva
+          parâmetro de posição — o padrão do GSAP é emendar no fim da
+          timeline. Com `"<"`, que alinha ao *início* da animação
+          anterior, os cartões entravam junto com o começo do espaçador,
+          isto é, imediatamente após o primeiro: a pausa não acontecia e
+          o espaçador virava rolagem morta no fim do trecho preso.
+          Aumentá-lo, nesse estado, só alongava a espera depois de tudo
+          já ter entrado.
 
           O que sai de cena não some: recua um degrau e continua
           assomando por trás, para que o conjunto leia como uma pilha de
@@ -438,14 +445,14 @@ export function Education() {
         deck.slice(1).forEach((card, index) => {
           const below = deck.slice(0, index + 1);
           entrance
-            .to({}, { duration: 2.1 })
+            .to({}, { duration: 1.2 })
             /*
               O de baixo recua e tomba um grau para o lado oposto: é o
               desalinho que denuncia que existe outro documento atrás,
               em vez de os dois se sobreporem em bloco perfeito e o de
               trás simplesmente sumir.
             */
-            .to(below, { scale: 0.94, y: -14, rotate: -2.2, duration: 0.5 }, "<")
+            .to(below, { scale: 0.94, y: -14, rotate: -2.2, duration: 0.5 })
             .to(card, { autoAlpha: 1, y: 0, rotate: 1.4, duration: 0.5 }, "<");
         });
 
