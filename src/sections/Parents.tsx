@@ -5,7 +5,7 @@ import { WhatsAppCta } from "@/components/WhatsAppCta";
 import { useReveal } from "@/hooks/useReveal";
 import { rich } from "@/utils/rich";
 import { gsap, MOTION_OK } from "@/utils/gsap";
-import parentalVideo from "@assets/orientacao-parental.mp4";
+import parentalVideo from "@assets/video/orientacao-parental.mp4";
 
 export function Parents() {
   const ref = useReveal<HTMLElement>();

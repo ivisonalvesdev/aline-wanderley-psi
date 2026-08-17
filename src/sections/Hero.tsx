@@ -5,9 +5,9 @@ import { WhatsAppCta } from "@/components/WhatsAppCta";
 import { rich } from "@/utils/rich";
 import { cn } from "@/utils/cn";
 import { gsap, SplitText, EASE, MOTION_OK } from "@/utils/gsap";
-import heroImage from "@assets/img-principal-hero.webp";
-import heroImageMobile from "@assets/hero-mobile.webp";
-import logoAline from "@assets/logo-maior.webp";
+import heroImage from "@assets/img/img-principal-hero.webp";
+import heroImageMobile from "@assets/img/hero-mobile.webp";
+import logoAline from "@assets/img/logo-maior.webp";
 
 interface HeroProps {
   /** Dispara a intro somente após o preloader sair de cena. */

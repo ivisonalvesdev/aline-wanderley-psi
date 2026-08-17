@@ -5,7 +5,7 @@ import { rich } from "@/utils/rich";
 import { gsap, ScrollTrigger, EASE, MOTION_OK, POINTER_FINE, SCRUB } from "@/utils/gsap";
 import { useMagnetic } from "@/hooks/useMagnetic";
 import { cn } from "@/utils/cn";
-import formacaoImage from "@assets/formacao.webp";
+import formacaoImage from "@assets/img/formacao.webp";
 import diplomaPsicologia from "@assets/diplomas/diploma-psicologia.png";
 
 /**

@@ -6,14 +6,14 @@ import { useMagnetic } from "@/hooks/useMagnetic";
 import { gsap, MOTION_OK } from "@/utils/gsap";
 import { rich } from "@/utils/rich";
 import { cn } from "@/utils/cn";
-import aboutImage from "@assets/aline-sobre.webp";
-import aboutImageAlt from "@assets/sobre-2.webp";
-import aboutImage3 from "@assets/sobre-3.webp";
-import aboutImage5 from "@assets/sobre-5.webp";
-import aboutImage6 from "@assets/sobre-6.webp";
-import aboutImage7 from "@assets/sobre-7.webp";
-import lego1 from "@assets/lego-1.webp";
-import lego2 from "@assets/lego-2.webp";
+import aboutImage from "@assets/img/aline-sobre.webp";
+import aboutImageAlt from "@assets/img/sobre-2.webp";
+import aboutImage3 from "@assets/img/sobre-3.webp";
+import aboutImage5 from "@assets/img/sobre-5.webp";
+import aboutImage6 from "@assets/img/sobre-6.webp";
+import aboutImage7 from "@assets/img/sobre-7.webp";
+import lego1 from "@assets/img/lego-1.webp";
+import lego2 from "@assets/img/lego-2.webp";
 
 /**
  * Sequência de retratos do carrossel da figura.

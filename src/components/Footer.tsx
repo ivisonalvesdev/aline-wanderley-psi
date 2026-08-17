@@ -8,7 +8,7 @@ import { InstagramIcon } from "@/components/icons/InstagramIcon";
 import { gsap, MOTION_OK } from "@/utils/gsap";
 import { SignatureText } from "@/components/SignatureText";
 import { typewriterTarget } from "@/utils/typewriter";
-import logoAline from "@assets/logo-maior.webp";
+import logoAline from "@assets/img/logo-maior.webp";
 
 /** Corpo de referência da assinatura, só para medir — ver `fit`. */
 const BASE_SIGNATURE_REM = 6;

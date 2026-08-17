@@ -4,7 +4,7 @@ import { NAV_LINKS, SITE } from "@/constants/site";
 import { WhatsAppCta } from "@/components/WhatsAppCta";
 import { CTA_LABEL, CTA_LABEL_SHORT } from "@/constants/content";
 import { cn } from "@/utils/cn";
-import logoAline from "@assets/logo-maior.webp";
+import logoAline from "@assets/img/logo-maior.webp";
 
 /**
  * Header sticky com glassmorphism leve e scroll inteligente:

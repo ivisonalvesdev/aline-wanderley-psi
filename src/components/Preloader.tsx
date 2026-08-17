@@ -4,7 +4,7 @@ import { usePrefersReducedMotion } from "@/hooks/useMediaQuery";
 import { SITE } from "@/constants/site";
 import { SignatureText } from "@/components/SignatureText";
 import { typewriterTarget } from "@/utils/typewriter";
-import logoAline from "@assets/logo-maior.webp";
+import logoAline from "@assets/img/logo-maior.webp";
 
 interface PreloaderProps {
   onComplete: () => void;

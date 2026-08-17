@@ -32,7 +32,7 @@ const JOBS = [
   {
     nome: "Orientação Parental",
     src: asset("video-orientacao-parental", "Cerebro-Orientacao-Parental.mp4"),
-    out: asset("orientacao-parental.mp4"),
+    out: asset("video", "orientacao-parental.mp4"),
     crf: 20,
     /*
       Este caso é o oposto do de cima: a origem chegou já espremida a 164
