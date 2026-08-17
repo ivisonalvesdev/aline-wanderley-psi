@@ -3,6 +3,7 @@ import { ArrowDown, BadgeCheck } from "lucide-react";
 import { HERO, CTA_LABEL } from "@/constants/content";
 import { WhatsAppCta } from "@/components/WhatsAppCta";
 import { rich } from "@/utils/rich";
+import { cn } from "@/utils/cn";
 import { gsap, SplitText, EASE, MOTION_OK } from "@/utils/gsap";
 import heroImage from "@assets/img-principal-hero.webp";
 import heroImageMobile from "@assets/hero-mobile.webp";
@@ -261,16 +262,27 @@ export function Hero({ introReady }: HeroProps) {
             {rich(HERO.subheadline)}
           </p>
 
-          {/* Badges de credibilidade */}
+          {/* Badges de credibilidade.
+              No celular só sobram "Online para todo o Brasil" e "Presencial
+              em Recife": o CRP já aparece no destaque da seção Sobre e a
+              TCC já está nomeada no subtítulo logo acima, então os dois
+              primeiros selos eram redundância pura — e redundância aqui
+              custava uma linha inteira de altura, bloco que está ancorado
+              no rodapé e disputa espaço com a foto da Aline.
+              De `sm` para cima sobra espaço de sobra, e os quatro voltam:
+              lá a dupla CRP/TCC não empurra nada, só reforça a credencial. */}
           <ul
             data-hero-item
             className="mt-4 flex flex-wrap gap-2 sm:mt-7 sm:gap-2.5 short:mt-5"
             aria-label="Credenciais"
           >
-            {HERO.badges.map((badge) => (
+            {HERO.badges.map((badge, i) => (
               <li
                 key={badge}
-                className="inline-flex items-center gap-1.5 rounded-full bg-white/12 px-2.5 py-1 font-alt text-[10px] font-medium tracking-[0.02em] text-white ring-1 ring-white/25 backdrop-blur-md sm:px-3.5 sm:py-1.5 sm:text-xs"
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full bg-white/12 px-2.5 py-1 font-alt text-[10px] font-medium tracking-[0.02em] text-white ring-1 ring-white/25 backdrop-blur-md sm:px-3.5 sm:py-1.5 sm:text-xs",
+                  i < 2 && "max-sm:hidden",
+                )}
               >
                 <BadgeCheck className="size-3 shrink-0 text-blush-200 sm:size-3.5" aria-hidden="true" />
                 {badge}
