@@ -28,7 +28,7 @@ export const HERO = {
   headline: "Por trás de cada **comportamento,** existe uma **emoção** precisando de **acolhimento.**",
   subheadline:
     "Psicoterapia infantojuvenil fundamentada na **Terapia Cognitivo-Comportamental (TCC)**.",
-  badges: ["CRP 02/25892", "Abordagem TCC", "Online para todo o Brasil", "Presencial em Recife"],
+  badges: ["CRP 02/25892", "Abordagem TCC", "Presencial em Recife", "Online para todo o Brasil"],
 } as const;
 
 /**

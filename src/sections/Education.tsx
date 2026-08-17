@@ -5,7 +5,7 @@ import { rich } from "@/utils/rich";
 import { gsap, ScrollTrigger, EASE, MOTION_OK, POINTER_FINE, SCRUB } from "@/utils/gsap";
 import { useMagnetic } from "@/hooks/useMagnetic";
 import { cn } from "@/utils/cn";
-import formacaoVideo from "@assets/formacao.mp4";
+import formacaoImage from "@assets/formacao.webp";
 import diplomaPsicologia from "@assets/diplomas/diploma-psicologia.png";
 
 /**
@@ -197,17 +197,6 @@ export function Education() {
     document.body.style.overflow = "hidden";
     closeRef.current?.focus();
 
-    /*
-      Pausa o vídeo enquanto a ampliação está aberta.
-
-      Vale pelos dois lados: o fundo do diálogo usa `backdrop-blur`, e
-      desfocar vídeo em reprodução obriga o navegador a refazer o efeito a
-      cada quadro — caro justamente quando a atenção está no documento.
-      E o vídeo, atrás do escurecido, não teria quem o assistisse.
-    */
-    const video = rootRef.current?.querySelector<HTMLVideoElement>("[data-formacao-video]");
-    video?.pause();
-
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeZoom();
     };
@@ -216,7 +205,6 @@ export function Education() {
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKey);
-      void video?.play().catch(() => {});
     };
   }, [zoomed, closeZoom]);
 
@@ -228,21 +216,16 @@ export function Education() {
 
     /**
      * `motion` decide se há animação; `pinned` separa desktop de toque, que
-     * aqui recebem roteiros diferentes (ver o comentário em `playVideo`).
+     * aqui recebem roteiros diferentes de entrada dos cartões.
      */
     mm.add({ pinned: POINTER_FINE, motion: MOTION_OK }, (ctx) => {
       if (!ctx.conditions?.motion) return;
 
       const pinned = Boolean(ctx.conditions?.pinned);
-      const video = root.querySelector<HTMLVideoElement>("[data-formacao-video]");
       const dim = root.querySelector<HTMLElement>("[data-formacao-dim]");
       const items = root.querySelectorAll<HTMLElement>("[data-formacao-item]");
       const cards = root.querySelectorAll<HTMLElement>("[data-formacao-card]");
       const hidden = [...items, ...cards];
-
-      // O atributo `muted` no JSX nem sempre chega ao DOM a tempo, e sem
-      // ele o navegador recusa o autoplay. Reforça na propriedade.
-      if (video) video.muted = true;
 
       gsap.set(hidden, { autoAlpha: 0, y: 22 });
 
@@ -254,71 +237,18 @@ export function Education() {
        * disputa.
        *
        * No celular os cartões passam por cima da Aline, e mostrar as duas
-       * coisas juntas tira da pessoa a escolha de ver o vídeo limpo. Ali a
-       * entrada é percorrida pela rolagem — parada, ela vê só o vídeo;
+       * coisas juntas tira da pessoa a escolha de ver a imagem limpa. Ali a
+       * entrada é percorrida pela rolagem — parada, ela vê só a foto;
        * deslizando, traz os cartões.
        */
-      const playVideo = () => {
-        if (!video) return;
-        /*
-          O loop é reafirmado a cada retomada, e não só na montagem.
-
-          O `load()` do warmup mais abaixo reinicia o elemento, e há
-          navegadores que descartam a propriedade nesse caminho. O
-          arquivo tem 8s e o trecho preso do celular passou a durar bem
-          mais que isso — sem o loop garantido, a cena congelava no meio
-          da seção, o que aparecia como "o vídeo para quando o segundo
-          documento chega".
-        */
-        video.loop = true;
-        // A promessa é rejeitada quando a política de autoplay barra — o
-        // vídeo fica no primeiro quadro e o texto entra do mesmo jeito,
-        // então não há o que tratar.
-        void video.play().catch(() => {});
-      };
-
       let entrance: gsap.core.Timeline;
-      let trigger: ScrollTrigger;
-      /** Só existe no desktop: adianta o play em relação ao pin. */
-      let prime: ScrollTrigger | undefined;
-      const cleanups: Array<() => void> = [];
-
-      /* Rede de segurança do loop: se por qualquer motivo o vídeo chegar
-         ao fim, recomeça. Cobre os casos em que a propriedade `loop`
-         sozinha não segurou. */
-      if (video) {
-        const restart = () => {
-          video.currentTime = 0;
-          void video.play().catch(() => {});
-        };
-        video.addEventListener("ended", restart);
-        cleanups.push(() => video.removeEventListener("ended", restart));
-      }
+      let trigger: ScrollTrigger | undefined;
 
       if (pinned) {
         entrance = gsap.timeline({ paused: true, defaults: { ease: EASE } });
         entrance
           .to(items, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.11 })
           .to(cards, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.14 }, "-=0.6");
-
-        /*
-          O vídeo começa a tocar antes de a seção travar, e não no mesmo
-          instante.
-
-          Decodificar o primeiro quadro custa alguns milissegundos, e
-          prender a seção obriga o navegador a refazer o layout de tudo o
-          que vem abaixo. Disparados no mesmo quadro, os dois custos se
-          somavam — era a travadinha ao chegar na seção. Meia tela antes,
-          o vídeo já está rodando quando o pin entra.
-        */
-        prime = ScrollTrigger.create({
-          trigger: root,
-          start: "top 55%",
-          onEnter: playVideo,
-          onEnterBack: playVideo,
-        });
-
-        if (video) video.loop = true;
 
         trigger = ScrollTrigger.create({
           trigger: root,
@@ -353,16 +283,14 @@ export function Education() {
           },
         });
       } else {
-        if (video) video.loop = true;
-
         /*
           No celular quem conduz a coreografia é o dedo, não o relógio.
 
-          A seção trava e o vídeo roda. Enquanto a pessoa não deslizar, o
-          progresso fica em zero: ela vê o vídeo limpo pelo tempo que
-          quiser, sem nada por cima. Ao deslizar, os cartões entram no
-          ritmo do próprio gesto; seguindo em frente, o pin solta e a
-          página continua.
+          A seção trava e a foto fica parada. Enquanto a pessoa não
+          deslizar, o progresso fica em zero: ela vê a imagem limpa pelo
+          tempo que quiser, sem nada por cima. Ao deslizar, os cartões
+          entram no ritmo do próprio gesto; seguindo em frente, o pin solta
+          e a página continua.
 
           É o contrário da versão anterior, que contava segundos: ali a
           espera era imposta, e depois de ver tudo ainda sobrava uma tela e
@@ -455,52 +383,10 @@ export function Education() {
             .to(below, { scale: 0.94, y: -14, rotate: -2.2, duration: 0.5 })
             .to(card, { autoAlpha: 1, y: 0, rotate: 1.4, duration: 0.5 }, "<");
         });
-
-        // O vídeo acompanha a presença da seção em tela, e não o pin: ele
-        // já está rodando quando a seção trava, e continua enquanto ela
-        // estiver visível.
-        /*
-          `onToggle` no lugar dos quatro retornos separados.
-
-          Com os quatro, um `onLeave` disparado por remedida durante o
-          trecho preso pausava o vídeo sem que nada o retomasse depois —
-          a seção continuava à vista e a cena, parada. Aqui o estado é
-          derivado de `isActive`: enquanto a seção estiver em quadro o
-          vídeo roda, e qualquer reativação o traz de volta sozinha.
-        */
-        trigger = ScrollTrigger.create({
-          trigger: root,
-          start: "top bottom",
-          end: "bottom top",
-          onToggle: (self) => {
-            if (self.isActive) playVideo();
-            else video?.pause();
-          },
-        });
       }
 
-      /**
-       * Os 7 MB do vídeo não podem sair junto com o resto da página — a
-       * seção fica lá embaixo, e quem nunca chega nela não deveria pagar
-       * por isso. O download começa quando a seção está a menos de uma
-       * tela de distância, tempo suficiente para o começo estar pronto.
-       */
-      const warmup = ScrollTrigger.create({
-        trigger: root,
-        start: "top bottom+=100%",
-        once: true,
-        onEnter: () => {
-          if (!video) return;
-          video.preload = "auto";
-          video.load();
-        },
-      });
-
       return () => {
-        for (const dispose of cleanups) dispose();
-        warmup.kill();
-        prime?.kill();
-        trigger.kill();
+        trigger?.kill();
         entrance.scrollTrigger?.kill();
         entrance.kill();
       };
@@ -517,45 +403,44 @@ export function Education() {
       className="relative isolate flex min-h-svh items-center overflow-hidden py-24 sm:py-28 short:py-16"
     >
       {/*
-        O vídeo é cenário, não conteúdo: fica em `-z-10` com o véu por
+        A foto é cenário, não conteúdo: fica em `-z-10` com o véu por
         cima, como a foto do hero. A cor de fundo do wrapper cobre o
-        intervalo entre o layout e o primeiro quadro decodificado — sem
-        ela, o vazio aparece como retângulo preto no meio de uma página
-        clara.
+        intervalo entre o layout e a imagem carregar — sem ela, o vazio
+        aparece como retângulo sólido no meio de uma página clara.
       */}
       {/*
-        No celular o fundo abaixo da faixa de vídeo não é a ameixa cheia.
+        No celular o fundo abaixo da faixa de foto não é a ameixa cheia.
 
         Ela encostava logo abaixo do notebook, e o contraste ali ficava
         duro justamente no ponto em que a cena termina. O degradê entra
         com um tom mais claro na altura da faixa e só fecha na ameixa
-        original mais abaixo — a massa escura desce, e a passagem do
-        vídeo para o fundo deixa de disputar com a mesa.
+        original mais abaixo — a massa escura desce, e a passagem da foto
+        para o fundo deixa de disputar com a mesa.
 
         A cor chapada continua como base: é ela que cobre o intervalo
-        entre o layout e o primeiro quadro decodificado, e no desktop,
-        onde o vídeo ocupa tudo, é a única que aparece.
+        entre o layout e a imagem carregar, e no desktop, onde a foto
+        ocupa tudo, é a única que aparece.
       */}
       <div
         aria-hidden="true"
         className="absolute inset-0 -z-10 bg-[rgb(78_30_45)] max-sm:bg-[linear-gradient(to_bottom,rgb(158_106_124)_0%,rgb(150_98_117)_82%,rgb(132_80_100)_90%,rgb(112_60_80)_100%)]"
       >
-        <video
-          data-formacao-video
-          src={formacaoVideo}
-          muted
-          playsInline
-          preload="metadata"
+        <img
+          src={formacaoImage}
+          alt=""
+          loading="lazy"
+          decoding="async"
           /*
-            No celular o vídeo é uma faixa, não um fundo de tela cheia.
+            No celular a foto é uma faixa, não um fundo de tela cheia.
 
-            O arquivo é 16:9 e a tela do celular é quase o inverso disso.
-            Cobrindo a altura toda, o `cover` precisava ampliar o quadro a
-            ponto de sobrar só ~26% da largura — uma fatia vertical com o
-            rosto dela e mais nada. O notebook, as mãos e a mesa, que são o
-            que conta a cena, ficavam inteiramente fora. Não havia
-            ancoragem que resolvesse: o problema é de proporção, não de
-            enquadramento.
+            O arquivo é bem mais largo que alto (a mesma proporção do
+            vídeo que ela substituiu) e a tela do celular é quase o
+            inverso disso. Cobrindo a altura toda, o `cover` precisava
+            ampliar o quadro a ponto de sobrar só ~26% da largura — uma
+            fatia vertical com o rosto dela e mais nada. O notebook, as
+            mãos e a mesa, que são o que conta a cena, ficavam inteiramente
+            fora. Não havia ancoragem que resolvesse: o problema é de
+            proporção, não de enquadramento.
 
             Limitar a altura inverte a conta. Numa faixa de ~54svh o
             `cover` amplia bem menos e a janela visível passa a caber a
@@ -571,11 +456,17 @@ export function Education() {
 
             No eixo Y o 22% do desktop segue valendo: em notebook largo e
             baixo o corte é vertical, e a cabeça dela quase encosta no topo
-            do vídeo — centralizar cortava justamente ali. Na faixa do
+            da foto — centralizar cortava justamente ali. Na faixa do
             celular não há sobra vertical, então o eixo Y é indiferente e
-            só o X é ancorado, em 10%, que é onde a cena fica centrada.
+            só o X importa.
+
+            O X em 14% é um toque leve a partir do centro original (10%) —
+            o suficiente para o canto do notebook ganhar um pouco mais de
+            presença sem tirar nada da Aline. 24% chegou a ser testado e
+            mostrava mais notebook ainda, mas a pedido dela o corte voltou
+            para perto de onde estava; 14% é essa correção.
           */
-          className="w-full object-cover object-[10%_50%] max-sm:h-[82svh] max-sm:[-webkit-mask-image:linear-gradient(to_bottom,#000_84%,rgb(0_0_0/0.55)_94%,transparent_100%)] max-sm:[mask-image:linear-gradient(to_bottom,#000_84%,rgb(0_0_0/0.55)_94%,transparent_100%)] sm:h-full sm:object-[32%_22%]"
+          className="w-full object-cover object-[14%_50%] max-sm:h-[82svh] max-sm:[-webkit-mask-image:linear-gradient(to_bottom,#000_84%,rgb(0_0_0/0.55)_94%,transparent_100%)] max-sm:[mask-image:linear-gradient(to_bottom,#000_84%,rgb(0_0_0/0.55)_94%,transparent_100%)] sm:h-full sm:object-[32%_22%]"
         />
 
         <div className="formacao-veil absolute inset-0" />
@@ -586,7 +477,7 @@ export function Education() {
           No celular os cartões passam por cima da Aline — não há coluna
           livre ao lado como no desktop —, e o véu sozinho não separa o
           suficiente documento de cenário. Entra depois dos cartões, no fim
-          da coreografia, para que o vídeo apareça limpo primeiro.
+          da coreografia, para que a foto apareça limpa primeiro.
 
           Fica sempre no DOM, em opacidade zero, e quem o acende é a
           coreografia sem pin. Esconder por largura (`lg:hidden`) pareceria
@@ -599,7 +490,7 @@ export function Education() {
 
       <div className="container-page">
         {/* O conteúdo ocupa a metade direita, onde o véu está mais fechado
-            — a esquerda fica livre para a Aline aparecer no vídeo. */}
+            — a esquerda fica livre para a Aline aparecer na foto. */}
         <div className="lg:ml-auto lg:w-[54%] lg:max-w-2xl xl:w-1/2">
           <p
             data-formacao-item

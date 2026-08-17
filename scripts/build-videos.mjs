@@ -1,18 +1,21 @@
 /**
  * Prepara os vídeos de fundo do site.
  *
- * O que os dois casos têm em comum: o vídeo é exibido em tela cheia, sem
- * `max-width`, ou seja, esticado em qualquer monitor comum. Deixar essa
- * escala para o navegador foi exatamente o que estragou a primeira
- * tentativa de animação do hero — o filtro de upscale em tempo real é fraco
- * e produz halo. Aqui a escala é feita uma vez, offline, com Lanczos, e o
- * resultado sai em 1080p: o navegador recebe o quadro no tamanho em que vai
- * exibi-lo, que é onde estava a perda.
+ * O vídeo é exibido em tela cheia, sem `max-width`, ou seja, esticado em
+ * qualquer monitor comum. Deixar essa escala para o navegador foi
+ * exatamente o que estragou a primeira tentativa de animação do hero — o
+ * filtro de upscale em tempo real é fraco e produz halo. Aqui a escala é
+ * feita uma vez, offline, com Lanczos, e o resultado sai em 1080p: o
+ * navegador recebe o quadro no tamanho em que vai exibi-lo, que é onde
+ * estava a perda.
  *
- * Nenhum dos originais fica versionado — são megabytes que o site não usa,
- * já que o que vai ao ar é o resultado deste script. Este arquivo existe
- * para o dia em que um vídeo mudar: as receitas abaixo são o que não se
- * quer redescobrir.
+ * O original não fica versionado — são megabytes que o site não usa, já
+ * que o que vai ao ar é o resultado deste script. Este arquivo existe para
+ * o dia em que o vídeo mudar: a receita abaixo é o que não se quer
+ * redescobrir.
+ *
+ * A seção Formação tinha um vídeo aqui também; virou foto estática
+ * (`assets/formacao.webp`), então saiu deste pipeline.
  *
  *   npm run video
  */
@@ -26,20 +29,6 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const asset = (...parts) => join(ROOT, "assets", ...parts);
 
 const JOBS = [
-  {
-    nome: "Formação",
-    src: asset("video-origem", "formacao.mp4"),
-    out: asset("formacao.mp4"),
-    /*
-      CRF 20 é o ponto em que este material para de ganhar com mais bits. A
-      origem já vem com bitrate alto para 720p (~7 Mbps), então o quadro é
-      limpo e o gargalo é a resolução, não a compressão. Abaixo de 20 o
-      arquivo cresce sem diferença visível; acima de 23 os degradês pastel
-      das paredes começam a mostrar blocking.
-    */
-    crf: 20,
-    filtros: "scale=1920:1080:flags=lanczos",
-  },
   {
     nome: "Orientação Parental",
     src: asset("video-orientacao-parental", "Cerebro-Orientacao-Parental.mp4"),

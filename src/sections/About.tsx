@@ -3,13 +3,54 @@ import { ABOUT } from "@/constants/content";
 import { SITE } from "@/constants/site";
 import { useReveal } from "@/hooks/useReveal";
 import { useMagnetic } from "@/hooks/useMagnetic";
-import { gsap, MOTION_OK, SCRUB } from "@/utils/gsap";
+import { gsap, MOTION_OK } from "@/utils/gsap";
 import { rich } from "@/utils/rich";
 import { cn } from "@/utils/cn";
 import aboutImage from "@assets/aline-sobre.webp";
 import aboutImageAlt from "@assets/sobre-2.webp";
+import aboutImage3 from "@assets/sobre-3.webp";
+import aboutImage5 from "@assets/sobre-5.webp";
+import aboutImage6 from "@assets/sobre-6.webp";
+import aboutImage7 from "@assets/sobre-7.webp";
 import lego1 from "@assets/lego-1.webp";
 import lego2 from "@assets/lego-2.webp";
+
+/**
+ * Sequência de retratos do carrossel da figura.
+ *
+ * Só o primeiro leva `alt` descritivo — é o que a seção mostra em repouso,
+ * antes de qualquer rolagem, e por isso é o único que um leitor de tela
+ * chega a anunciar como imagem própria. Os demais são a mesma pessoa no
+ * mesmo contexto (fotos de trabalho da Aline), decorativos como já era a
+ * segunda foto antes desta lista crescer.
+ *
+ * As duas primeiras são 1080×1350; as quatro novas vieram 1000×1500 — a
+ * `width`/`height` de cada `<img>` usa a proporção real do arquivo (só
+ * evita o salto de layout antes do CSS carregar); quem decide o
+ * enquadramento exibido é sempre o `object-cover` do quadro 4:5 do figure.
+ */
+const ABOUT_PHOTOS = [
+  {
+    src: aboutImage,
+    alt: "Aline Wanderley sentada no chão do consultório, sorrindo entre peças de montar",
+    width: 1080,
+    height: 1350,
+  },
+  { src: aboutImageAlt, alt: "", width: 1080, height: 1350 },
+  { src: aboutImage3, alt: "", width: 1000, height: 1500 },
+  { src: aboutImage5, alt: "", width: 1000, height: 1500 },
+  { src: aboutImage6, alt: "", width: 1000, height: 1500 },
+  { src: aboutImage7, alt: "", width: 1000, height: 1500 },
+] as const;
+
+/**
+ * Inércia do traço da assinatura — bem acima do `SCRUB` padrão do site
+ * (0.7, usado nos demais reveals) porque este traço pediu suavidade
+ * própria. Quanto maior, mais o elemento "persegue" a rolagem em vez de
+ * segui-la colado; ver o comentário junto ao `ScrollTrigger` da
+ * assinatura, mais abaixo, para o valor em contexto.
+ */
+const SIGNATURE_SCRUB = 1.5;
 
 interface LegoProps {
   src: string;
@@ -91,28 +132,37 @@ export function About() {
       return notebook ? "bottom bottom+=44" : "bottom bottom";
     };
 
+    /*
+      Ritmo de cada troca: pausa, cruzamento, pausa — a mesma proporção da
+      versão original de duas fotos (0.12 + 0.76 + 0.12 = 1 "unidade").
+      Encadeadas, as fotos de `ABOUT_PHOTOS` (topo do arquivo) rendem N-1
+      trocas; `swapUnits`, logo abaixo, soma tudo isso para saber quanto de
+      rolagem a sequência inteira precisa.
+    */
+    const SWAP_PAUSE = 0.12;
+    const SWAP_CROSS = 0.76;
+
     const buildSwap = (scrollTrigger: gsap.TimelineVars["scrollTrigger"]) => {
       const figure = figureRef.current;
-      const first = figure?.querySelector<HTMLElement>("[data-photo='first']");
-      const second = figure?.querySelector<HTMLElement>("[data-photo='second']");
-      if (!figure || !first || !second) return;
+      const photos = figure ? [...figure.querySelectorAll<HTMLElement>("[data-photo]")] : [];
+      if (!figure || photos.length < 2) return;
 
       /*
-        As duas fotos sobem para camada própria da GPU antes do cruzamento
-        e voltam ao normal depois.
+        As fotos sobem para camada própria da GPU antes do cruzamento e
+        voltam ao normal depois.
 
         Sem isto, cada quadro do crossfade obriga o navegador a repintar a
-        área inteira da figura — duas imagens de 1080×1350 com opacidade e
-        escala mudando ao mesmo tempo, dentro de uma seção presa. Era o que
-        se sentia como travadinha no momento exato da troca. Declarar o
-        `will-change` antes permite promover a camada uma vez, com folga,
-        em vez de no primeiro quadro da animação.
+        área inteira da figura — duas imagens em ~1080px de largura com
+        opacidade e escala mudando ao mesmo tempo, dentro de uma seção
+        presa. Era o que se sentia como travadinha no momento exato da
+        troca. Declarar o `will-change` antes permite promover a camada
+        uma vez, com folga, em vez de no primeiro quadro da animação.
 
         A limpeza no fim importa tanto quanto: `will-change` permanente
-        segura as duas imagens em memória de vídeo pelo resto da visita.
+        seguraria todas as fotos em memória de vídeo pelo resto da visita.
       */
-      const layerUp = () => gsap.set([first, second], { willChange: "opacity, transform" });
-      const layerDown = () => gsap.set([first, second], { willChange: "auto" });
+      const layerUp = () => gsap.set(photos, { willChange: "opacity, transform" });
+      const layerDown = () => gsap.set(photos, { willChange: "auto" });
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -124,31 +174,40 @@ export function About() {
         },
       });
 
-      // Os respiros de 0.12 no começo e no fim são o que dá tempo de ver o
-      // que aconteceu: a seção trava, segura um instante, troca, segura de
-      // novo e só então libera a página.
-      tl.to({}, { duration: 0.12 })
-        .fromTo(
-          second,
+      // Os respiros de 0.12 são o que dá tempo de ver o que aconteceu: a
+      // seção trava, segura um instante, troca, segura de novo — e só
+      // depois da última foto a página é liberada.
+      tl.to({}, { duration: SWAP_PAUSE });
+      for (let i = 1; i < photos.length; i++) {
+        tl.fromTo(
+          photos[i],
           { autoAlpha: 0, scale: 1.07 },
-          { autoAlpha: 1, scale: 1, duration: 0.76, ease: "power1.inOut" },
+          { autoAlpha: 1, scale: 1, duration: SWAP_CROSS, ease: "power1.inOut" },
           ">",
         )
-        .fromTo(
-          first,
-          { autoAlpha: 1 },
-          { autoAlpha: 0, scale: 1.03, duration: 0.76, ease: "power1.inOut" },
-          "<",
-        )
-        .to({}, { duration: 0.12 });
+          .fromTo(
+            photos[i - 1],
+            { autoAlpha: 1 },
+            { autoAlpha: 0, scale: 1.03, duration: SWAP_CROSS, ease: "power1.inOut" },
+            "<",
+          )
+          .to({}, { duration: SWAP_PAUSE });
+      }
     };
 
+    // Soma das "unidades" acima para as N-1 trocas de ABOUT_PHOTOS. Para
+    // duas fotos dá exatamente 1.0 — a mesma conta de antes desta lista
+    // crescer, então o multiplicador de tela cheia abaixo continua valendo.
+    const swapUnits =
+      SWAP_PAUSE + (ABOUT_PHOTOS.length - 1) * (SWAP_CROSS + SWAP_PAUSE);
+
     /**
-     * A seção trava em qualquer tela — a troca precisa acontecer à vista.
+     * A seção trava em qualquer tela — as trocas precisam acontecer à vista.
      *
-     * Sem o pin, quem rola em ritmo normal já passou da foto quando o
-     * crossfade começa. Com ele, a página segura por pouco menos de uma
-     * tela de rolagem: a seção para, a foto troca, e a rolagem retoma.
+     * Sem o pin, quem rola em ritmo normal já passou a foto quando o
+     * crossfade começa. Com ele, a página segura pelo tempo de todas as
+     * trocas em sequência: a seção para, as fotos se revezam uma a uma, e
+     * só então a rolagem retoma.
      *
      * O ponto de travamento é decidido na hora, pela medida real:
      *
@@ -164,8 +223,10 @@ export function About() {
         trigger: ref.current,
         start: swapStart,
         // Pausa mais curta no celular: a mesma distância de rolagem custa
-        // muito mais gestos com o dedo do que com a roda do mouse.
-        end: () => `+=${window.innerHeight * (window.innerWidth < 640 ? 0.7 : 0.9)}`,
+        // muito mais gestos com o dedo do que com a roda do mouse. O
+        // `swapUnits` é quem estica essa distância conforme o número de
+        // fotos — mais retratos, mais tela de rolagem para vê-los todos.
+        end: () => `+=${window.innerHeight * (window.innerWidth < 640 ? 0.7 : 0.9) * swapUnits}`,
         pin: true,
         pinSpacing: true,
         anticipatePin: 1,
@@ -197,9 +258,25 @@ export function About() {
      * fade padrão do site (`data-reveal`) — texto corrido precisa ser
      * lido, e qualquer revelação linha a linha atrasa essa leitura.
      *
-     * A medida espera `fonts.ready`: enquanto a fonte de assinatura não
-     * chega, o texto está na de fallback, com métrica diferente, e o
-     * recorte sairia na largura errada.
+     * Não espera mais `fonts.ready`, como esperava antes — e a espera
+     * nunca fez falta para esta técnica de recorte.
+     *
+     * O recorte é feito em porcentagem (`inset(-30% 100% -30% 0)` fechado,
+     * `inset(-30% 0% -30% 0)` aberto), relativa à própria caixa do
+     * elemento, não à largura em pixels da fonte. 100% é "tudo escondido"
+     * e 0% é "tudo à vista" — não importa a métrica de qual fonte está
+     * desenhada no momento.
+     *
+     * O que ela causava: este `ScrollTrigger` nascia num instante
+     * imprevisível (o que fosse que `fonts.ready` levasse para resolver),
+     * quase sempre depois de o da troca de retrato já existir. Criar um
+     * `ScrollTrigger` novo faz o GSAP re-medir todos os outros da página —
+     * e, se a pessoa já tivesse rolado para longe (de volta ao Hero, por
+     * exemplo) quando essa remedida chegasse, o intervalo recém-calculado
+     * podia colocar a posição atual do scroll *dentro* da faixa da
+     * assinatura, escrevendo-a de um salto só. Era o bug relatado. Criar o
+     * gatilho já na primeira passagem do efeito, junto com o da foto,
+     * evita essa segunda remedida tardia.
      */
     mm.add(
       {
@@ -226,55 +303,49 @@ export function About() {
         const CLOSED = { clipPath: "inset(-30% 100% -30% 0)" };
         const OPEN = { clipPath: "inset(-30% 0% -30% 0)" };
 
-        /* Fecha já, antes de qualquer medida: sem isto a assinatura
-           apareceria escrita durante a espera pelas fontes e só então
-           sumiria para ser escrita de novo. */
         gsap.set(signature, CLOSED);
 
-        let tween: gsap.core.Tween | undefined;
+        /*
+          A assinatura é preenchida pela rolagem, como era antes.
 
-        document.fonts.ready.then(() => {
-          if (!section.isConnected) return;
+          Lado a lado, o percurso é o da própria seção presa: a mão assina
+          enquanto os retratos trocam. Empilhado, esse trecho não serve,
+          porque quando as fotos trocam a assinatura já subiu para fora da
+          tela; ali ela volta a ser percorrida pela própria entrada em
+          cena.
 
-          /*
-            A assinatura é preenchida pela rolagem, como era antes.
-
-            Lado a lado, o percurso é o da própria seção presa: a mão
-            assina no mesmo trecho em que o retrato troca. Empilhado, esse
-            trecho não serve, porque quando a foto troca a assinatura já
-            subiu para fora da tela; ali ela volta a ser percorrida pela
-            própria entrada em cena.
-          */
-          tween = gsap.fromTo(signature, CLOSED, {
-            ...OPEN,
-            ease: "none",
-            scrollTrigger: sideBySide
-              ? {
-                  trigger: section,
-                  start: swapStart,
-                  /*
-                    A seção fica travada por ~0,9 tela. 0,6 alonga o
-                    percurso da escrita a pedido da Aline — mais devagar
-                    que a versão anterior (0,4) — mantendo folga antes da
-                    liberação do pin, para não terminar junto com ela.
-                  */
-                  end: () => `+=${window.innerHeight * 0.6}`,
-                  scrub: SCRUB,
-                }
-              : {
-                  trigger: signature,
-                  start: "top 92%",
-                  // Janela mais larga que antes (era "top 66%") para a
-                  // escrita render mais devagar, a pedido da Aline.
-                  end: "top 58%",
-                  scrub: SCRUB,
-                },
-          });
+          `SIGNATURE_SCRUB`, bem mais alto que o `SCRUB` padrão do site
+          (0.7), é o que dá a suavidade extra pedida pela Aline: o traço
+          "persegue" a rolagem com bem mais atraso, em vez de segui-la
+          quase colado. As janelas de scroll também alargaram — 0.6 tela
+          virou 1.1 no desktop, e a faixa do celular quase dobrou —, então
+          a mesma distância de dedo/roda agora rende bem menos progresso
+          por vez.
+        */
+        const tween = gsap.fromTo(signature, CLOSED, {
+          ...OPEN,
+          ease: "none",
+          scrollTrigger: sideBySide
+            ? {
+                trigger: section,
+                start: swapStart,
+                // A seção agora fica travada por várias telas (uma por
+                // foto do carrossel); 1.1 tela de escrita ainda deixa
+                // folga de sobra antes da liberação do pin.
+                end: () => `+=${window.innerHeight * 1.1}`,
+                scrub: SIGNATURE_SCRUB,
+              }
+            : {
+                trigger: signature,
+                start: "top 96%",
+                end: "top 40%",
+                scrub: SIGNATURE_SCRUB,
+              },
         });
 
         return () => {
-          tween?.scrollTrigger?.kill();
-          tween?.kill();
+          tween.scrollTrigger?.kill();
+          tween.kill();
         };
       },
     );
@@ -410,36 +481,34 @@ export function About() {
             data-parallax="0.05"
             className="absolute -inset-2.5 -rotate-2 rounded-[2.25rem] bg-gradient-to-tl from-cloud-200/70 to-blush-100/70 sm:-inset-3 sm:rounded-[2.75rem]"
           />
-          {/* As duas fotos são 1080×1350 (4:5) — mesma proporção do quadro,
-              sem corte, e empilháveis para a troca sem salto de layout. */}
+          {/* O quadro é 4:5 e recorta (`object-cover`) qualquer fonte —
+              as seis fotos de `ABOUT_PHOTOS` não compartilham proporção
+              (as duas originais são 4:5, as quatro novas vieram 2:3), e é
+              por isso que o corte fica a cargo do CSS, não do arquivo. */}
           <figure
             ref={figureRef}
             className="relative aspect-4/5 overflow-hidden rounded-[2rem] shadow-[0_32px_80px_-32px_rgb(48_42_44_/_0.22)] ring-1 ring-white/60 sm:rounded-[2.5rem]"
           >
-            <img
-              data-photo="first"
-              src={aboutImage}
-              alt="Aline Wanderley sentada no chão do consultório, sorrindo entre peças de montar"
-              loading="lazy"
-              decoding="async"
-              width={1080}
-              height={1350}
-              className="size-full object-cover"
-            />
-            {/* Decorativa: mesma pessoa, mesmo contexto — o texto
-                alternativo da primeira já descreve a cena para quem
-                usa leitor de tela. */}
-            <img
-              data-photo="second"
-              src={aboutImageAlt}
-              alt=""
-              aria-hidden="true"
-              loading="lazy"
-              decoding="async"
-              width={1080}
-              height={1350}
-              className="absolute inset-0 size-full object-cover opacity-0"
-            />
+            {ABOUT_PHOTOS.map((photo, index) => (
+              <img
+                key={photo.src}
+                data-photo
+                src={photo.src}
+                alt={photo.alt}
+                aria-hidden={photo.alt ? undefined : "true"}
+                loading="lazy"
+                decoding="async"
+                width={photo.width}
+                height={photo.height}
+                className={cn(
+                  "size-full object-cover",
+                  // A primeira fica no fluxo normal — é ela quem dá a
+                  // dimensão da figura via `aspect-4/5`. As demais ficam
+                  // empilhadas por cima, prontas para o crossfade.
+                  index === 0 ? "" : "absolute inset-0 opacity-0",
+                )}
+              />
+            ))}
           </figure>
 
           {/* Peças de montar da versão compacta (abaixo de lg), ancoradas
