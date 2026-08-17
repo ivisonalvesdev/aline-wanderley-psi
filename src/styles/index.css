@@ -255,33 +255,6 @@
     font-weight: var(--rich-weight, 600);
     color: var(--rich-accent, var(--color-blush-600));
   }
-
-  /**
-   * Camadas de profundidade dentro de um cartão inclinável.
-   *
-   * O deslocamento só existe enquanto o cartão está sob o cursor. Manter
-   * `translateZ` fixo custaria nitidez o tempo todo: com perspectiva, o
-   * elemento deslocado é reescalado por um fator fracionário (1.036, por
-   * exemplo) e o navegador passa a rasterizar o texto fora da grade de
-   * pixels — o resultado é um borrão sutil, mas permanente.
-   */
-  .depth-1,
-  .depth-2,
-  .depth-3 {
-    transition: transform 0.55s var(--ease-out-soft);
-  }
-
-  [data-tilting="true"] .depth-1 {
-    transform: translateZ(14px);
-  }
-
-  [data-tilting="true"] .depth-2 {
-    transform: translateZ(26px);
-  }
-
-  [data-tilting="true"] .depth-3 {
-    transform: translateZ(42px);
-  }
 }
 
 /* ---------------------------------- */
@@ -400,8 +373,12 @@
  * queda de luz de cima para baixo. Só funciona quando há algo colorido
  * atrás para ser borrado — sobre branco liso, vidro e papel são iguais.
  *
- * O reflexo (`::after`) é posicionado pelas variáveis que o `useTilt`
- * atualiza e acende apenas com o cursor sobre a peça.
+ * Já teve um reflexo (`::after`) que seguia o cursor, aceso pela
+ * inclinação 3D dos cartões da seção "A abordagem" (`useTilt`, em
+ * `Tcc.tsx`). O `backdrop-filter` sobre um elemento com contexto 3D
+ * (`transform-style: preserve-3d`/perspectiva) deixava o texto do cartão
+ * com um borrão sutil e permanente — mesmo parado, sem o mouse por perto
+ * — então a inclinação saiu, e o reflexo foi junto por depender dela.
  */
 @utility card-glass {
   position: relative;
@@ -417,26 +394,6 @@
   box-shadow:
     0 24px 60px -28px rgb(48 42 44 / 0.22),
     inset 0 1px 0 0 rgb(255 255 255 / 0.85);
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.45s var(--ease-out-soft);
-    background: radial-gradient(
-      42rem 24rem at var(--glare-x, 50%) var(--glare-y, 0%),
-      rgb(255 255 255 / 0.55) 0%,
-      rgb(255 255 255 / 0.18) 28%,
-      rgb(255 255 255 / 0) 60%
-    );
-  }
-
-  &[data-tilting="true"]::after {
-    opacity: 1;
-  }
 }
 
 /**

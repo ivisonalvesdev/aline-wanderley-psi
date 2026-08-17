@@ -1,7 +1,6 @@
 import { TCC_STEPS } from "@/constants/content";
 import { SectionHeading } from "@/components/SectionHeading";
 import { useReveal } from "@/hooks/useReveal";
-import { useTilt } from "@/hooks/useTilt";
 import { rich } from "@/utils/rich";
 
 interface StepProps {
@@ -11,37 +10,50 @@ interface StepProps {
 }
 
 /**
- * Etapa da abordagem, em vidro e com inclinação 3D.
+ * Etapa da abordagem, em vidro.
  *
- * A perspectiva fica no `<li>` e a rotação no `<article>`: se as duas
- * vivessem no mesmo elemento, cada cartão giraria em torno do ponto de
- * fuga do próprio centro e os três se moveriam como se estivessem em
- * telas separadas. Com o pai definindo a perspectiva, eles compartilham
- * um único observador — que é o que faz a fila parecer um objeto só.
- *
- * O `translateZ` dos filhos os ergue do plano do cartão: no giro, número
- * e título flutuam alguns pixels à frente do vidro. É esse deslocamento
- * relativo que o olho lê como profundidade real.
+ * Já teve inclinação 3D pelo cursor (`useTilt`), retirada por deixar o
+ * texto do cartão com um borrão sutil e permanente — mesmo em repouso,
+ * sem o mouse por perto. A causa é a combinação, não o vidro sozinho:
+ * `backdrop-filter: blur()` sobre um elemento com `transform-style:
+ * preserve-3d`/perspectiva ativa é um caso conhecido em que o navegador
+ * rasteriza o conteúdo fora da grade de pixels. O `card-glass` (vidro
+ * fosco do fundo) continua; o que saiu foi só o contexto 3D que vinha
+ * junto com o giro.
  */
 function TccStep({ number, title, description }: StepProps) {
-  const tiltRef = useTilt<HTMLElement>({ max: 7, perspective: 1100, scale: 1.025 });
-
   return (
-    <li data-reveal className="[perspective:1200px]">
+    <li data-reveal>
+      {/*
+        `onTouchStart` vazio existe só para o Safari do iOS: ele só aplica
+        `:active` a elementos "tocáveis" de verdade (links, botões) ou que
+        tenham algum listener de toque — sem isto, `max-sm:active:` nunca
+        dispararia lá. O `-webkit-tap-highlight-color` zerado evita que o
+        retângulo cinza padrão do toque apareça por cima do gradiente.
+
+        Nada disto usa `transform`: é opacidade de uma camada de fundo, o
+        mesmo tipo de propriedade que o `backdrop-filter` do vidro já lida
+        bem sozinho. Não reabre o problema do brilho antigo (ver comentário
+        acima) porque não recria o contexto 3D que o causava.
+      */}
       <article
-        ref={tiltRef}
-        className="card-glass group relative h-full p-6 will-change-transform [transform-style:preserve-3d] sm:p-8"
+        onTouchStart={() => {}}
+        className="card-glass group relative h-full overflow-hidden p-6 [-webkit-tap-highlight-color:transparent] sm:p-8"
       >
         <span
           aria-hidden="true"
-          className="depth-3 tabular block font-display text-4xl font-light tracking-[-0.03em] text-blush-300 transition-colors duration-500 group-hover:text-blush-400 sm:text-5xl"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blush-200/60 via-cream-100/35 to-cloud-200/60 opacity-0 transition-opacity duration-300 ease-out max-sm:active:opacity-100"
+        />
+        <span
+          aria-hidden="true"
+          className="tabular relative block font-display text-4xl font-light tracking-[-0.03em] text-blush-300 transition-colors duration-500 group-hover:text-blush-400 sm:text-5xl"
         >
           {number}
         </span>
-        <h3 className="depth-2 mt-4 font-display text-lg font-semibold tracking-[-0.012em] text-ink-900 sm:text-xl">
+        <h3 className="relative mt-4 font-display text-lg font-semibold tracking-[-0.012em] text-ink-900 sm:text-xl">
           {title}
         </h3>
-        <p className="depth-1 mt-3 text-sm leading-[1.75] text-ink-700 sm:text-base">
+        <p className="relative mt-3 text-sm leading-[1.75] text-ink-700 sm:text-base">
           {rich(description)}
         </p>
       </article>
