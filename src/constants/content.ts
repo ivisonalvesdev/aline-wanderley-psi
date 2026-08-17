@@ -27,7 +27,7 @@ export const HERO = {
   // O selo de texto acima do título deu lugar à logo da marca.
   headline: "Por trás de cada **comportamento,** existe uma **emoção** precisando de **acolhimento.**",
   subheadline:
-    "Psicoterapia fundamentada na **Terapia Cognitivo-Comportamental (TCC)**. Um espaço seguro e acolhedor em Recife e online para todo o Brasil.",
+    "Psicoterapia infantojuvenil fundamentada na **Terapia Cognitivo-Comportamental (TCC)**.",
   badges: ["CRP 02/25892", "Abordagem TCC", "Online para todo o Brasil", "Presencial em Recife"],
 } as const;
 

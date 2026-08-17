@@ -505,18 +505,35 @@
     suficiente para o cabeçalho não sumir, e o fechamento acontece do meio
     para baixo, onde não há mais foto a preservar. A versão anterior
     começava em 0.58 e velava justamente o rosto.
+
+    O joelho fica em 55%, e não por estética: é onde passa a aresta da
+    bancada na foto. Acima dela está a Aline; abaixo, a superfície rosa
+    lisa — que é, medida na imagem, a região MAIS CLARA do quadro (luz
+    ~178/255 contra ~120 na altura do busto). Texto branco sobre ela sem
+    véu dá 2:1 de contraste. Daí o formato em S: quase transparente até
+    38%, subida curta entre 46% e 64%, e patamar alto no rodapé.
+
+    As paradas de 52% a 70% foram reforçadas quando o bloco de texto
+    desceu para o rodapé — o título saiu de cima do busto e caiu na
+    bancada, trocando um fundo médio por um claro. Nas alturas onde hoje
+    ficam título, selos e botões a conta fecha entre 4,3:1 e 7:1 sobre
+    branco. Em 38–46% a curva ficou mais leve que a anterior: é a faixa
+    do busto e dos braços, e ali cada centésimo a menos é foto da Aline
+    de volta ao ar.
   */
   background-image: linear-gradient(
     180deg,
     rgb(48 42 44 / 0.06) 0%,
     rgb(48 42 44 / 0.05) 12%,
     rgb(48 42 44 / 0.05) 26%,
-    rgb(48 42 44 / 0.08) 38%,
-    rgb(48 42 44 / 0.16) 48%,
-    rgb(48 42 44 / 0.3) 58%,
-    rgb(48 42 44 / 0.44) 68%,
-    rgb(48 42 44 / 0.56) 78%,
-    rgb(48 42 44 / 0.64) 88%,
+    rgb(48 42 44 / 0.07) 38%,
+    rgb(48 42 44 / 0.11) 46%,
+    rgb(48 42 44 / 0.2) 52%,
+    rgb(48 42 44 / 0.34) 58%,
+    rgb(48 42 44 / 0.44) 64%,
+    rgb(48 42 44 / 0.52) 70%,
+    rgb(48 42 44 / 0.58) 78%,
+    rgb(48 42 44 / 0.65) 88%,
     rgb(48 42 44 / 0.7) 100%
   );
 

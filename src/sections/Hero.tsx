@@ -72,9 +72,18 @@ export function Hero({ introReady }: HeroProps) {
 
   return (
     /*
-      O padding inferior é maior que o superior de propósito: com
-      `items-center`, essa diferença é o que ergue o bloco de texto acima
-      do meio da tela sem encostar no header fixo.
+      De `lg` para cima o padding inferior é maior que o superior de
+      propósito: com `items-center`, essa diferença é o que ergue o bloco
+      de texto acima do meio da tela sem encostar no header fixo.
+
+      No celular a regra se inverte. Com `items-end` quem manda é só o
+      padding de baixo, e cada pixel tirado dele é um pixel que o bloco
+      inteiro desce — ou seja, um pixel a menos de texto sobre a Aline.
+      O piso deixou de ser o botão flutuante do WhatsApp: como ele vive
+      em `z-70`, sempre por cima do conteúdo, um leve encavalamento no
+      canto inferior direito não quebra nada — só o botão passa a
+      desenhar por cima do fim do CTA secundário. O `env()` preserva a
+      mesma folga em aparelhos com barra de gestos.
     */
     <section
       ref={rootRef}
@@ -86,12 +95,21 @@ export function Hero({ introReady }: HeroProps) {
         No celular a foto é vertical e já foi composta para isto: a Aline
         ocupa o topo e a bancada rosa fica livre embaixo. O conteúdo, então,
         desce para o rodapé (`items-end`) e a logo sobe sozinha para o canto
-        superior esquerdo — texto sobre o vazio da foto, sem cobrir ninguém.
+        superior esquerdo — o texto procura o vazio da foto.
+
+        A aresta da bancada cai por volta de 56% da tela, o que deixa ~44%
+        de área livre; o bloco (título de quatro linhas, subtítulo, quatro
+        selos e dois botões) pede ~60%. Ou seja: o texto encosta na Aline
+        por aritmética, não por descuido. O que dá para fazer — e está
+        feito — é gastar o mínimo possível acima da aresta: padding
+        inferior no limite do botão flutuante e intervalos internos um
+        passo mais curtos. Quem quiser o bloco inteiro abaixo da linha
+        precisa de outra foto, com mais bancada.
 
         De `lg` para cima volta a foto horizontal, com a Aline à direita, e
         o bloco inteiro recentraliza como antes.
       */
-      className="relative isolate flex min-h-svh items-end overflow-hidden pt-20 pb-28 sm:pb-32 lg:items-center lg:pt-32 lg:pb-40 short:pt-24 short:pb-16"
+      className="relative isolate flex min-h-svh items-end overflow-hidden pt-20 pb-[calc(3rem+env(safe-area-inset-bottom))] sm:pb-32 lg:items-center lg:pt-32 lg:pb-40 short:pt-24 short:pb-16"
     >
       {/*
         Fundo de capa: a foto já traz o cenário e a Aline à direita.
@@ -127,8 +145,15 @@ export function Hero({ introReady }: HeroProps) {
 
         {/* Dissolve a foto no branco da próxima seção — evita o corte seco.
             Faixa alta com curva atrasada: a emenda some por completo sem
-            que o claro suba até os CTAs (texto branco) em telas baixas. */}
-        <div className="hero-fade-bottom absolute inset-x-0 bottom-0 h-36 sm:h-44 lg:h-56 short:h-24" />
+            que o claro suba até os CTAs (texto branco) em telas baixas.
+
+            No celular a faixa encurtou de 9rem para 7rem porque os botões
+            desceram: com 9rem, a base do CTA secundário (texto branco em
+            fundo translúcido) caía onde o degradê já tem ~20% de branco.
+            Em 7rem esse mesmo ponto tem ~9%, e a emenda continua invisível
+            — ali embaixo a foto é a bancada lisa, a superfície mais fácil
+            de dissolver da página. */}
+        <div className="hero-fade-bottom absolute inset-x-0 bottom-0 h-28 sm:h-44 lg:h-56 short:h-24" />
       </div>
 
       {/*
@@ -217,9 +242,21 @@ export function Hero({ introReady }: HeroProps) {
             {rich(HERO.headline)}
           </h1>
 
+          {/*
+            Os intervalos deste bloco (12 / 16 / 20px) são um passo mais
+            curtos do que os de `sm` para cima. O bloco está ancorado no
+            rodapé: encurtar o miolo não empurra nada para baixo, faz o
+            topo descer — são ~14px de foto devolvidos à Aline sem tirar
+            uma palavra do texto nem mexer no corpo das fontes.
+
+            A escada 12 < 16 < 20 é o que preserva a hierarquia: título e
+            subtítulo lêem-se como um par, e cada degrau maior anuncia um
+            grupo mais distante. Achatar tudo num valor só juntaria selos
+            e botões numa mancha só.
+          */}
           <p
             data-hero-item
-            className="mt-4 max-w-lg text-[0.9375rem] leading-[1.65] text-white/90 [--rich-accent:var(--color-blush-200)] [--rich-weight:500] sm:mt-6 sm:text-lg sm:leading-[1.7] xl:max-w-xl short:mt-4 short:text-base"
+            className="mt-3 max-w-lg text-[0.9375rem] leading-[1.65] text-white/90 [--rich-accent:var(--color-blush-200)] [--rich-weight:500] sm:mt-6 sm:text-lg sm:leading-[1.7] xl:max-w-xl short:mt-4 short:text-base"
           >
             {rich(HERO.subheadline)}
           </p>
@@ -227,7 +264,7 @@ export function Hero({ introReady }: HeroProps) {
           {/* Badges de credibilidade */}
           <ul
             data-hero-item
-            className="mt-5 flex flex-wrap gap-2 sm:mt-7 sm:gap-2.5 short:mt-5"
+            className="mt-4 flex flex-wrap gap-2 sm:mt-7 sm:gap-2.5 short:mt-5"
             aria-label="Credenciais"
           >
             {HERO.badges.map((badge) => (
@@ -252,7 +289,7 @@ export function Hero({ introReady }: HeroProps) {
               dentro da faixa a última declarada prevalece. */}
           <div
             data-hero-item
-            className="mt-6 flex flex-col gap-2.5 sm:mt-9 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 short:mt-6"
+            className="mt-5 flex flex-col gap-2 sm:mt-9 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 short:mt-6"
           >
             <WhatsAppCta
               size="lg"
