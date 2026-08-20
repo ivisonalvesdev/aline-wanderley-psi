@@ -9,8 +9,8 @@ import { cn } from "@/utils/cn";
 import aboutImage from "@assets/img/aline-sobre.webp";
 import aboutImageAlt from "@assets/img/sobre-2.webp";
 import aboutImage3 from "@assets/img/sobre-3.webp";
+import aboutImage4 from "@assets/img/sobre-4.webp";
 import aboutImage5 from "@assets/img/sobre-5.webp";
-import aboutImage6 from "@assets/img/sobre-6.webp";
 import aboutImage7 from "@assets/img/sobre-7.webp";
 import lego1 from "@assets/img/lego-1.webp";
 import lego2 from "@assets/img/lego-2.webp";
@@ -24,10 +24,11 @@ import lego2 from "@assets/img/lego-2.webp";
  * mesmo contexto (fotos de trabalho da Aline), decorativos como já era a
  * segunda foto antes desta lista crescer.
  *
- * As duas primeiras são 1080×1350; as quatro novas vieram 1000×1500 — a
- * `width`/`height` de cada `<img>` usa a proporção real do arquivo (só
- * evita o salto de layout antes do CSS carregar); quem decide o
- * enquadramento exibido é sempre o `object-cover` do quadro 4:5 do figure.
+ * As duas primeiras são 1080×1350; das demais, a maioria veio 1000×1500 e
+ * uma (sobre-4) veio 1280×1600 — a `width`/`height` de cada `<img>` usa a
+ * proporção real do arquivo (só evita o salto de layout antes do CSS
+ * carregar); quem decide o enquadramento exibido é sempre o `object-cover`
+ * do quadro 4:5 do figure.
  */
 const ABOUT_PHOTOS = [
   {
@@ -38,8 +39,8 @@ const ABOUT_PHOTOS = [
   },
   { src: aboutImageAlt, alt: "", width: 1080, height: 1350 },
   { src: aboutImage3, alt: "", width: 1000, height: 1500 },
+  { src: aboutImage4, alt: "", width: 1280, height: 1600 },
   { src: aboutImage5, alt: "", width: 1000, height: 1500 },
-  { src: aboutImage6, alt: "", width: 1000, height: 1500 },
   { src: aboutImage7, alt: "", width: 1000, height: 1500 },
 ] as const;
 
@@ -483,8 +484,9 @@ export function About() {
           />
           {/* O quadro é 4:5 e recorta (`object-cover`) qualquer fonte —
               as seis fotos de `ABOUT_PHOTOS` não compartilham proporção
-              (as duas originais são 4:5, as quatro novas vieram 2:3), e é
-              por isso que o corte fica a cargo do CSS, não do arquivo. */}
+              (as duas originais e a sobre-4 são 4:5, as demais vieram
+              2:3), e é por isso que o corte fica a cargo do CSS, não do
+              arquivo. */}
           <figure
             ref={figureRef}
             className="relative aspect-4/5 overflow-hidden rounded-[2rem] shadow-[0_32px_80px_-32px_rgb(48_42_44_/_0.22)] ring-1 ring-white/60 sm:rounded-[2.5rem]"
