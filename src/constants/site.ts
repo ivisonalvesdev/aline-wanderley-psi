@@ -11,8 +11,7 @@ export const SITE = {
   /** Endereço do consultório. Sem número/sala por decisão da Aline, por segurança. */
   street: "Avenida Engenheiro Domingos Ferreira",
   postalCode: "51020-040",
-  /* TODO: substituir pelo domínio definitivo */
-  url: "https://alinewanderley.com.br",
+  url: "https://www.alinewanderleypsicologa.com.br",
   /** DDI + DDD + número, só dígitos: +55 (81) 9 9698-2391 */
   whatsappNumber: "5581996982391",
   /** O mesmo número, como se lê. Vizinho do original de propósito: são

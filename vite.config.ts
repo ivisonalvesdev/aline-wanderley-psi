@@ -5,7 +5,7 @@ import { fileURLToPath, URL } from "node:url";
 import { FAQ_ITEMS } from "./src/constants/faq";
 
 /** Domínio de produção — precisa bater com o canonical do index.html. */
-const SITE_URL = "https://alinewanderley.com.br";
+const SITE_URL = "https://www.alinewanderleypsicologa.com.br";
 
 /**
  * Injeta o bloco `FAQPage` do JSON-LD a partir de `constants/faq.ts`.

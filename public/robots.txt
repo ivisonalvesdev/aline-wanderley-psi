@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://alinewanderley.com.br/sitemap.xml
+Sitemap: https://www.alinewanderleypsicologa.com.br/sitemap.xml

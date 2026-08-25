@@ -17,10 +17,10 @@ npm run preview # pré-visualizar o build
 
 1. **WhatsApp** — em [src/constants/site.ts](src/constants/site.ts), substituir
    `whatsappNumber` pelo número real (DDI+DDD, somente dígitos).
-2. **Domínio** — substituir `https://alinewanderley.com.br` em:
-   - [src/constants/site.ts](src/constants/site.ts)
-   - [index.html](index.html) (canonical, Open Graph, JSON-LD)
-   - [public/robots.txt](public/robots.txt) e [public/sitemap.xml](public/sitemap.xml)
+2. **Domínio** — `https://www.alinewanderleypsicologa.com.br` já é o domínio de
+   produção (configurado em [src/constants/site.ts](src/constants/site.ts),
+   [index.html](index.html), [vite.config.ts](vite.config.ts),
+   [public/robots.txt](public/robots.txt) e [public/sitemap.xml](public/sitemap.xml)).
 3. **Fotos** — substituir os `<ImagePlaceholder />`:
    - Hero: marcado com `{/* FOTO HERO */}` em [src/sections/Hero.tsx](src/sections/Hero.tsx)
    - Sobre: marcado com `{/* FOTO SOBRE */}` em [src/sections/About.tsx](src/sections/About.tsx)
