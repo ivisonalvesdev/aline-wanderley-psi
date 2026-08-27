@@ -93,161 +93,71 @@ export function About() {
     const mm = gsap.matchMedia();
 
     /**
-     * Troca de retrato conduzida pelo scroll.
+     * Troca de retrato em loop automático — não depende mais da rolagem.
      *
-     * A montagem do crossfade é a mesma nos dois casos abaixo; o que muda
-     * é o percurso em que ela acontece. O `scale` mínimo de cada foto
-     * existe para o cruzamento não parecer um corte: uma recua enquanto a
-     * outra se assenta.
+     * Antes a seção travava (`pin`) e as trocas eram scrubadas pelo scroll;
+     * com mais fotos adicionadas, isso esticava a página por várias telas
+     * (uma faixa de rolagem por foto), deixando o scroll da seção muito
+     * longo. Agora cada foto fica 3s em tela e cruza para a próxima
+     * sozinha, num timeline que se repete para sempre — a seção não ganha
+     * altura extra nenhuma, só as fotos entram em loop.
      */
-    /**
-     * Onde a seção trava para a troca de retrato.
-     *
-     * Vive fora do `buildSwap` porque a assinatura precisa do mesmo ponto:
-     * ela é escrita enquanto a foto está trocando, e para isso os dois
-     * gatilhos têm de concordar sobre onde esse instante começa.
-     */
-    const swapStart = () => {
-      const section = ref.current;
-      if (!section || section.offsetHeight <= window.innerHeight * 0.96) {
-        return "center center";
-      }
+    const AUTOPLAY_HOLD = 2.2; // segundos com a foto parada, em tela cheia
+    const AUTOPLAY_CROSS = 0.8; // segundos do cruzamento até a próxima
+    // HOLD + CROSS = 3s: é o intervalo entre uma foto virar a "atual" e a
+    // seguinte tomar o lugar dela.
 
-      /*
-        Alinhar o fim da seção ao fim da tela deixa o começo dela para fora,
-        acima. Em notebook isso é sensível: a tela é larga o bastante para o
-        layout lado a lado, mas baixa, e o corte comia o topo da seção — era
-        a sensação de enquadramento "puxado para cima".
-
-        O `+=` desce o ponto de travamento: a seção prende com o fim um
-        pouco abaixo da borda inferior, o que devolve a mesma medida de
-        volta no topo. Não abre folga nenhuma, porque aqui a seção já é mais
-        alta que a tela — só troca o que fica de fora embaixo pelo que
-        estava faltando em cima.
-
-        A condição é a mesma da variante `short` do CSS (largura de lg com
-        tela baixa), que é onde o problema aparece. Em monitor grande a
-        seção cabe inteira e nem chega neste ramo.
-      */
-      const notebook = window.innerWidth >= 1024 && window.innerHeight <= 864;
-      return notebook ? "bottom bottom+=44" : "bottom bottom";
-    };
-
-    /*
-      Ritmo de cada troca: pausa, cruzamento, pausa — a mesma proporção da
-      versão original de duas fotos (0.12 + 0.76 + 0.12 = 1 "unidade").
-      Encadeadas, as fotos de `ABOUT_PHOTOS` (topo do arquivo) rendem N-1
-      trocas; `swapUnits`, logo abaixo, soma tudo isso para saber quanto de
-      rolagem a sequência inteira precisa.
-    */
-    const SWAP_PAUSE = 0.12;
-    const SWAP_CROSS = 0.76;
-
-    const buildSwap = (scrollTrigger: gsap.TimelineVars["scrollTrigger"]) => {
+    mm.add(MOTION_OK, () => {
       const figure = figureRef.current;
       const photos = figure ? [...figure.querySelectorAll<HTMLElement>("[data-photo]")] : [];
       if (!figure || photos.length < 2) return;
 
       /*
-        As fotos sobem para camada própria da GPU antes do cruzamento e
-        voltam ao normal depois.
-
-        Sem isto, cada quadro do crossfade obriga o navegador a repintar a
-        área inteira da figura — duas imagens em ~1080px de largura com
-        opacidade e escala mudando ao mesmo tempo, dentro de uma seção
-        presa. Era o que se sentia como travadinha no momento exato da
-        troca. Declarar o `will-change` antes permite promover a camada
-        uma vez, com folga, em vez de no primeiro quadro da animação.
-
-        A limpeza no fim importa tanto quanto: `will-change` permanente
-        seguraria todas as fotos em memória de vídeo pelo resto da visita.
+        `immediateRender: false` é o que impede o próprio `fromTo` de
+        estragar o repouso inicial: sem ele, o GSAP aplica o valor "from"
+        de cada tween assim que ela é criada — não quando o timeline
+        chega nela. Como a última volta do loop usa a foto 0 como
+        "próxima" (fechando o ciclo), essa foto acabaria herdando
+        `autoAlpha: 0` no instante em que o efeito monta, antes mesmo do
+        timeline tocar — apagando a foto que devia aparecer em repouso.
       */
-      const layerUp = () => gsap.set(photos, { willChange: "opacity, transform" });
-      const layerDown = () => gsap.set(photos, { willChange: "auto" });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          ...(scrollTrigger as ScrollTrigger.Vars),
-          onEnter: layerUp,
-          onEnterBack: layerUp,
-          onLeave: layerDown,
-          onLeaveBack: layerDown,
-        },
-      });
-
-      // Os respiros de 0.12 são o que dá tempo de ver o que aconteceu: a
-      // seção trava, segura um instante, troca, segura de novo — e só
-      // depois da última foto a página é liberada.
-      tl.to({}, { duration: SWAP_PAUSE });
-      for (let i = 1; i < photos.length; i++) {
-        tl.fromTo(
-          photos[i],
-          { autoAlpha: 0, scale: 1.07 },
-          { autoAlpha: 1, scale: 1, duration: SWAP_CROSS, ease: "power1.inOut" },
-          ">",
-        )
+      const tl = gsap.timeline({ repeat: -1, paused: true });
+      for (let i = 0; i < photos.length; i++) {
+        const next = photos[(i + 1) % photos.length];
+        tl.to({}, { duration: AUTOPLAY_HOLD })
           .fromTo(
-            photos[i - 1],
-            { autoAlpha: 1 },
-            { autoAlpha: 0, scale: 1.03, duration: SWAP_CROSS, ease: "power1.inOut" },
-            "<",
+            next,
+            { autoAlpha: 0, scale: 1.07 },
+            { autoAlpha: 1, scale: 1, duration: AUTOPLAY_CROSS, ease: "power1.inOut", immediateRender: false },
+            ">",
           )
-          .to({}, { duration: SWAP_PAUSE });
+          .to(photos[i], { autoAlpha: 0, scale: 1.03, duration: AUTOPLAY_CROSS, ease: "power1.inOut" }, "<");
       }
-    };
 
-    // Soma das "unidades" acima para as N-1 trocas de ABOUT_PHOTOS. Para
-    // duas fotos dá exatamente 1.0 — a mesma conta de antes desta lista
-    // crescer, então o multiplicador de tela cheia abaixo continua valendo.
-    const swapUnits =
-      SWAP_PAUSE + (ABOUT_PHOTOS.length - 1) * (SWAP_CROSS + SWAP_PAUSE);
+      /*
+        O loop só roda com a foto à vista — mesmo motivo do vídeo da seção
+        Pais (ver o comentário lá): rodar fora de quadro é gasto à toa. O
+        `will-change` também só fica ligado enquanto anima, para não
+        segurar as seis fotos em memória de vídeo o tempo todo.
+      */
+      const visibility = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            gsap.set(photos, { willChange: "opacity, transform" });
+            tl.play();
+          } else {
+            tl.pause();
+            gsap.set(photos, { willChange: "auto" });
+          }
+        },
+        { rootMargin: "0px" },
+      );
+      visibility.observe(figure);
 
-    /**
-     * A seção trava em qualquer tela — as trocas precisam acontecer à vista.
-     *
-     * Sem o pin, quem rola em ritmo normal já passou a foto quando o
-     * crossfade começa. Com ele, a página segura pelo tempo de todas as
-     * trocas em sequência: a seção para, as fotos se revezam uma a uma, e
-     * só então a rolagem retoma.
-     *
-     * O ponto de travamento é decidido na hora, pela medida real:
-     *
-     * - Se a seção cabe na tela, ela para centralizada.
-     * - Se não cabe (mobile e notebooks baixos, onde texto e foto ficam
-     *   empilhados), o travamento alinha o **fim** da seção ao fim da
-     *   tela. É o que garante a foto em quadro durante a pausa — no
-     *   empilhamento ela é o último elemento. Centralizar aqui deixaria
-     *   justamente a foto para fora, que era o defeito relatado.
-     */
-    mm.add(MOTION_OK, () => {
-      buildSwap({
-        trigger: ref.current,
-        start: swapStart,
-        // Pausa mais curta no celular: a mesma distância de rolagem custa
-        // muito mais gestos com o dedo do que com a roda do mouse. O
-        // `swapUnits` é quem estica essa distância conforme o número de
-        // fotos — mais retratos, mais tela de rolagem para vê-los todos.
-        end: () => `+=${window.innerHeight * (window.innerWidth < 640 ? 0.7 : 0.9) * swapUnits}`,
-        pin: true,
-        pinSpacing: true,
-        anticipatePin: 1,
-        scrub: 1,
-        /*
-          `invalidateOnRefresh` foi retirado de propósito.
-
-          Ele manda o GSAP reler os valores de origem de cada tween a cada
-          recálculo — e recálculo acontece quando qualquer pin da página
-          entra ou sai, inclusive o da seção Formação. Aqui os valores são
-          fixos (`autoAlpha` e `scale` escritos à mão), então essa releitura
-          não corrigia nada e ainda punha trabalho extra justamente no
-          quadro em que a seção trava. Era parte da travadinha na troca.
-        */
-        // Um pin altera a posição de tudo o que vem abaixo dele. A
-        // prioridade maior faz o GSAP recalcular este gatilho antes dos
-        // demais, para que as outras seções sejam medidas já com o espaço
-        // extra do pin no lugar.
-        refreshPriority: 1,
-      });
+      return () => {
+        visibility.disconnect();
+        tl.kill();
+      };
     });
 
     /**
@@ -309,31 +219,31 @@ export function About() {
         /*
           A assinatura é preenchida pela rolagem, como era antes.
 
-          Lado a lado, o percurso é o da própria seção presa: a mão assina
-          enquanto os retratos trocam. Empilhado, esse trecho não serve,
-          porque quando as fotos trocam a assinatura já subiu para fora da
-          tela; ali ela volta a ser percorrida pela própria entrada em
-          cena.
+          Lado a lado, o percurso é o da própria seção passando pela tela —
+          as fotos, agora em loop automático (ver mais acima), não ditam
+          mais esse ritmo. Empilhado, esse trecho não serve, porque a
+          assinatura já subiu para fora da tela nesse ponto; ali ela volta
+          a ser percorrida pela própria entrada em cena.
 
           `SIGNATURE_SCRUB`, bem mais alto que o `SCRUB` padrão do site
           (0.7), é o que dá a suavidade extra pedida pela Aline: o traço
           "persegue" a rolagem com bem mais atraso, em vez de segui-la
-          quase colado. As janelas de scroll também alargaram — 0.6 tela
-          virou 1.1 no desktop, e a faixa do celular quase dobrou —, então
-          a mesma distância de dedo/roda agora rende bem menos progresso
-          por vez.
+          quase colado.
+
+          No desktop a janela termina cedo (`top 55%`) de propósito: o
+          nome precisa estar pronto assim que a seção fica bem enquadrada
+          na tela, não ainda sendo escrito enquanto a pessoa já está lendo
+          o resto — o que ficou visível agora que as fotos não seguram
+          mais a rolagem no mesmo ritmo.
         */
         const tween = gsap.fromTo(signature, CLOSED, {
           ...OPEN,
           ease: "none",
           scrollTrigger: sideBySide
             ? {
-                trigger: section,
-                start: swapStart,
-                // A seção agora fica travada por várias telas (uma por
-                // foto do carrossel); 1.1 tela de escrita ainda deixa
-                // folga de sobra antes da liberação do pin.
-                end: () => `+=${window.innerHeight * 1.1}`,
+                trigger: signature,
+                start: "top 85%",
+                end: "top 55%",
                 scrub: SIGNATURE_SCRUB,
               }
             : {
