@@ -113,6 +113,16 @@ export function Footer() {
 
         const { width, ease } = typewriterTarget(clip, SITE.name.length);
 
+        /*
+          Abaixo de lg o rodapé empilha endereço, links e a faixa da
+          assinatura em várias telas de altura — `footer top 70%` disparava
+          a digitação assim que o rodapé começava a entrar, bem antes da
+          própria faixa aparecer. Ali o gatilho é a faixa da assinatura, não
+          o rodapé inteiro; de lg para cima o rodapé é baixo o bastante para
+          o gatilho original continuar certeiro.
+        */
+        const mobile = window.innerWidth < 1024;
+
         tween = gsap.fromTo(
           clip,
           { width: 0 },
@@ -129,11 +139,8 @@ export function Footer() {
               clip.style.width = "auto";
             },
             scrollTrigger: {
-              trigger: footerRef.current,
-              // O rodapé é alto; `top 70%` deixa a assinatura já dentro da
-              // tela quando a digitação começa, em vez de correr fora de
-              // quadro.
-              start: "top 70%",
+              trigger: mobile ? signatureBoxRef.current : footerRef.current,
+              start: mobile ? "top 90%" : "top 70%",
               once: true,
             },
           },
